@@ -2,7 +2,7 @@
 
 local x3fw = 3	---- x3 FIRST WI
 
-local store_vesselExpExtractionCost = 0.006666666
+local store_vesselExpExtractionCost = 0.001
 
 local event_custom			= "2023-04-16T00:00:00Z"-- It is necessary to change the start and end times in multiples of an hour, otherwise the imaginary quest may behave unpredictably.
 local creditsEventStart		= "2023-06-09T05:00:00Z"
