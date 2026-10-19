@@ -1205,6 +1205,12 @@ function ConfigureDediServer()
 	-- Длительность стадии сбора loot. (тип: дробное число)
 	cvars.sv_lootDuration				= 120
 
+	-- SC-112454 сид-чипы
+	cvars.sv_autogenModulesEnabled 		= 1
+	-- Где показывать сид-чипы: 1 - только в игре, 2 - в игре и в ангаре.
+	-- 1 — в игре, 2 — в игре и в ангаре. (тип: целое число)
+	cvars.sv_dbgAutogenDefs 			= 2
+
 	-- Коэффициент обычной salvage-конвертации найденного loot-предмета в токены.
 	-- Возврат считается от tokenPrice предмета: tokensRefund = tokenPrice * sv_salvageTokenConversion. (тип: дробное число)
 	cvars.sv_salvageTokenConversion		= 0.2
@@ -1387,6 +1393,13 @@ end
 --
 function ConfigureDediServerFlags( queueFlags )
 
+	-- SC-112454 сид-чипы
+	cvars.sv_autogenModulesEnabled 		= 1
+	-- Где показывать сид-чипы: 1 - только в игре, 2 - в игре и в ангаре.
+	-- 1 — в игре, 2 — в игре и в ангаре. (тип: целое число)
+	cvars.sv_dbgAutogenDefs 			= 2
+
+
 	if queueFlags.newbie ~= nil and queueFlags.newbie then
 		-- Переопределяет игровую настройку штрафа времени возрождения за смерть. (тип: дробное число)
 		cvars.sv_respawnTimePenalty = 0
@@ -1442,10 +1455,10 @@ function ConfigureZoneInstance()
 	cvars.sv_spaceStationPortalTimer = 3
 	
 	-- SC-112454 сид-чипы
-	cvars.sv_autogenModulesEnabled 		= 0
+	cvars.sv_autogenModulesEnabled 		= 1
 	-- Где показывать сид-чипы: 1 - только в игре, 2 - в игре и в ангаре.
 	-- 1 — в игре, 2 — в игре и в ангаре. (тип: целое число)
-	cvars.sv_dbgAutogenDefs 			= 0
+	cvars.sv_dbgAutogenDefs 			= 2
 	
 	-- Должен ли экземпляр зоны обмениваться данными с сервером скриптов. (тип: логический)
 	cvars.sv_enableCommunticationWithSS = 1
