@@ -4,20 +4,20 @@ local x3fw = 3	---- x3 FIRST WI
 
 local store_vesselExpExtractionCost = 0.006666666
 
-local event_custom			= "2023-04-16T00:00:00Z"-- Необходимо изменять время начала и конца кратно часу, иначе квест imaginary может вести себя непредсказуемо.
+local event_custom			= "2023-04-16T00:00:00Z"-- It is necessary to change the start and end times in multiples of an hour, otherwise the imaginary quest may behave unpredictably.
 local creditsEventStart		= "2023-06-09T05:00:00Z"
 local creditsEventEnd		= "2023-09-14T00:00:00Z"
 
--- Активация события BattlePass
-	-- battlePassStart - строка, время начала события в формате YYYY-MM-DDThh:mm:ssZ (ISO 8601)
-	-- battlePassEndTable - таблица, активные стадии в формате: { {stage, stageEndTime}, {stage, stageEndTime}, ...},
-	-- 		где stage - число, номер этапа (отсчет с 1), stageEndTime - строка, время окончания этапа в формате YYYY-MM-DDThh:mm:ssZ (ISO 8601);
-	--		stageEndTime может быть пустой строкой, в этом случае считается, что времени окончания у этапа нет, и он будет активен, пока его не уберут из списка
-	-- Внимание: данные о прогрессе игрока хранятся только на одно событие, при изменении времени начала события они теряются (считается, что это уже другое событие) (это не касается купленного через dlc премиума, который хранится для всех событий)
+-- BattlePass Event Activation
+	-- battlePassStart - string, event start time in the format YYYY-MM-DDThh:mm:ssZ (ISO 8601)
+	-- battlePassEndTable - table, active stages in the format: { {stage, stageEndTime}, {stage, stageEndTime}, ...},
+	-- where stage - number, stage number (counting from 1), stageEndTime - string, stage end time in the format YYYY-MM-DDThh:mm:ssZ (ISO 8601);
+	--	stageEndTime can be an empty string, in which case the stage is considered to have no end time and will remain active until it is removed from the list
+	-- Attention: data about a player’s progress is stored only for one event; if the start time of the event changes, they are lost (it is considered that this is already a different event) (this does not apply to premium purchased through Dlc, which is stored for all events)
 	local battlePassStart		= "2023-06-09T05:00:00Z"
-	local battlePassEndTable	= { {1,"2023-09-14T00:00:00Z"}, {2,"2023-09-14T00:00:00Z"}, {3,"2023-09-14T00:00:00Z"}} -- Следить, чтобы даты/время окончания 1го и 2го этапа одного БП были одинаковыми !!! Добавлен 3й этап (с лета 2023)
+	local battlePassEndTable	= { {1,"2023-09-14T00:00:00Z"}, {2,"2023-09-14T00:00:00Z"}, {3,"2023-09-14T00:00:00Z"}} -- Make sure that the end dates/times of the 1st and 2nd stages of one BP are the same!!! Added 3rd stage (from summer 2023)
 
--- список запрещенного оборудования (кораблей и модулей) в лигах
+-- list of prohibited equipment (ships and modules) in leagues
  local leagueForbiddenDefs =
 {
 	"Weapon_Minigun_NY_T3",
@@ -46,7 +46,7 @@ local creditsEventEnd		= "2023-09-14T00:00:00Z"
 	'Module_Glass_TimeBoost',
 }
 
--- список запрещённых дефов для адаптивных пресетов ботов
+-- list of prohibited defs for adaptive bot presets
 local botPresetForbiddenDefs =
 {
 	"Weapon_PlasmaWebLaser_T5_Mk1",
@@ -63,187 +63,187 @@ local numAdaptivePresets = 32
 --
 function ConfigureShard()
 
-	-- Разрешает автоматическое создание внутреннего аккаунта при первом входе. (тип: логический)
+	-- Allows automatic creation of an internal account upon first login. (type: boolean)
 	cvars.auth_allowInternalAutoCreate	= 1
 	
-	-- Уровень доступа к sandbox-функциям. (тип: целое число)
+	-- Level of access to sandbox functions. (type: integer)
 	cvars.sm_sandboxAccess				= 4
 
-	-- Минимальное значение антибот-счётчика для отправки почты. (тип: целое число; диапазон: 0..100)
+	-- Minimum anti-bot counter value for sending mail. (type: integer; range: 0..100)
 	cvars.shard_minAntibotCounterForMailSending = 50
 
-	-- Список admRole через ;, для которых действует бесконечный premium. (тип: строка)
+	-- List of admRole via ;, for which an infinite premium applies. (type: string)
 	cvars.auth_infinitePremiumForRoles	= "gm;support"
 
-	-- Размер отряда, которому не требуется premium для постановки в очередь. (тип: целое число)
+	-- Unit size that does not require premium to queue. (type: integer)
 	cvars.squad_maxNonPremiumSize		= 12
 
 	
-	-- Разрешает покупать предметы магазина, даже если у них стоит флаг cant_be_bought. (тип: логический)
+	-- Allows you to buy store items even if they have the cant_be_bought flag. (type: boolean)
 	cvars.store_allowAllItemsForBying	= 1
 
-	-- Включает логирование корабельных квестов. (тип: логический)
+	-- Enables logging of ship quests. (type: boolean)
 	cvars.shipQuests_dbgLog				= 0
 
-	-- Стартовое количество gold для нового аккаунта. (тип: целое число)
+	-- Starting amount of gold for a new account. (type: integer)
 	cvars.gold_on_start					= 30000
-	-- Стартовое premium-время/значение для нового аккаунта. (тип: целое число)
+	-- Starting premium time/value for a new account. (type: integer)
 	cvars.premium_on_start				= 1000
-	-- Стартовое количество credits для нового аккаунта. (тип: целое число)
+	-- The starting number of credits for a new account. (type: integer)
 	cvars.credits_on_start				= 0
 
-	-- Коэффициент вклада одного обычного корабля в prestige аккаунта. Итоговый prestige считается как: обычные корабли * store_prestigePerVssl + premium-корабли * store_prestigePerPremVssl. (тип: дробное число)
+	-- The coefficient of contribution of one regular ship to the prestige of an account. The final prestige is calculated as: regular ships * store_prestigePerVssl + premium ships * store_prestigePerPremVssl. (type: fractional number)
 	cvars.store_prestigePerVssl 		= 0.01
-	-- Коэффициент вклада одного premium-корабля в prestige аккаунта. Чем выше значение, тем сильнее premium-корабли повышают prestige. (тип: дробное число)
+	-- The coefficient of contribution of one premium ship to the prestige of the account. The higher the value, the more premium ships increase prestige. (type: fractional number)
 	cvars.store_prestigePerPremVssl 	= 0.01
 
-    -- Стоимость извлечения опыта корабля. (тип: дробное число)
+    -- The cost of extracting ship experience. (type: fractional number)
     cvars.store_vesselExpExtractionCost = store_vesselExpExtractionCost
     if cvars.store_vesselExpExtractionCost >= 0.006 then
-    	-- Визуальный бонус/индикатор стоимости извлечения опыта корабля. (тип: дробное число)
+    	-- Visual bonus/indicator of the cost of extracting ship experience. (type: fractional number)
     	cvars.store_vesselExpExtractionCostVisualBonus = 0
    	else
-    	-- Визуальный бонус/индикатор стоимости извлечения опыта корабля. (тип: дробное число)
+    	-- Visual bonus/indicator of the cost of extracting ship experience. (type: fractional number)
     	cvars.store_vesselExpExtractionCostVisualBonus = 1
     end
 
-	-- Множитель цен кораблей в магазине. Умножает все типы цены корабля: credits, premium, tokens и event-цену. (тип: дробное число; диапазон: 0.001f..100.0f)
+	-- Ship price multiplier in the store. Multiplies all types of ship prices: credits, premium, tokens and event price. (type: fractional number; range: 0.001f..100.0f)
 	cvars.store_vesselPriceMod		= 1
-	-- Множитель цен модулей в магазине. Умножает credits, premium, tokens и event-цену для предметов типа module. (тип: дробное число; диапазон: 0.001f..100.0f)
+	-- Price multiplier for modules in the store. Multiplies credits, premium, tokens and event price for module type items. (type: fractional number; range: 0.001f..100.0f)
 	cvars.store_modulePriceMod		= 1
-	-- Множитель цен боеприпасов в магазине. Умножает credits, premium, tokens и event-цену для предметов типа munition. (тип: дробное число; диапазон: 0.001f..100.0f)
+	-- Ammunition price multiplier in the store. Multiplies credits, premium, tokens and event price for munition type items. (type: fractional number; range: 0.001f..100.0f)
 	cvars.store_munitionPriceMod	= 1
 
-	-- Считать одиночного игрока отрядом из одного человека при подборе боя.
+	-- Treat a single player as a one-person squad when matchmaking.
 	cvars.mm_squad1AsSquad			= 0
 
-	-- Общий лимит суммарной поправки MMV от эффективности, KPM, побед и других факторов.
+	-- The total limit of the total adjustment of MMV from efficiency, KPM, victories and other factors.
 	cvars.mm_totalMMVMdCap			= 2
 
-	-- Параметр формулы MMV по рейтингу эффективности: Base - порог, Step - шаг, Cap - максимум.
+	-- Parameter of the MMV formula for efficiency rating: Base - threshold, Step - step, Cap - maximum.
 	cvars.mm_effRatingMMVMdBase 	= 0
-	-- Параметр формулы MMV по рейтингу эффективности: Base - порог, Step - шаг, Cap - максимум.
+	-- Parameter of the MMV formula for efficiency rating: Base - threshold, Step - step, Cap - maximum.
 	cvars.mm_effRatingMMVMdStep 	= 25
-	-- Параметр формулы MMV по рейтингу эффективности: Base - порог, Step - шаг, Cap - максимум.
+	-- Parameter of the MMV formula for efficiency rating: Base - threshold, Step - step, Cap - maximum.
 	cvars.mm_effRatingMMVMdCap 		= 50
-  	-- Параметр формулы MMV по KPM: Base - порог, Step - шаг, Cap - максимум.
+  	-- Parameter of the MMV formula by KPM: Base - threshold, Step - step, Cap - maximum.
   	--
   	cvars.mm_kpmMMVBase 		= 0
-	-- Параметр формулы MMV по KPM: Base - порог, Step - шаг, Cap - максимум.
+	-- Parameter of the MMV formula by KPM: Base - threshold, Step - step, Cap - maximum.
 	cvars.mm_kpmMMVStep 		= 0.0325
-	-- Параметр формулы MMV по KPM: Base - порог, Step - шаг, Cap - максимум.
+	-- Parameter of the MMV formula by KPM: Base - threshold, Step - step, Cap - maximum.
 	cvars.mm_kpmMMVCap 			= 50
 
-	-- Параметр формулы MMV по соотношению побед и поражений; MinBattles включает поправку только после нужного числа боёв.
+	-- MMV formula parameter based on win-loss ratio; MinBattles enables the correction only after the required number of battles.
 	-- Clamp (winLose - mm_winLoseMMVBase)/mm_winLoseMMVStep ; 0 ; mm_winLoseMMVCap )
 	cvars.mm_winLoseMMVMinBattles	= 2000
-	-- Параметр формулы MMV по соотношению побед и поражений.
+	-- Parameter of the MMV formula based on the ratio of wins and losses.
 	cvars.mm_winLoseMMVBase 		= 0.75
-	-- Параметр формулы MMV по соотношению побед и поражений.
+	-- Parameter of the MMV formula based on the ratio of wins and losses.
 	cvars.mm_winLoseMMVStep 		= 0.012
-	-- Параметр формулы MMV по соотношению побед и поражений.
+	-- Parameter of the MMV formula based on the ratio of wins and losses.
 	cvars.mm_winLoseMMVCap 			= 50
 
-	-- Таблица MMV-значений по рангам/группам матчмейкинга.
+	-- Table of MMV values ​​by ranks/matchmaking groups.
 	cvars.mm_mmvMdBattles 		= "200,200,200,200,200,200,200,100,0,0,0,0,0,0,0,0,0,0"
-	-- Таблица MMV-значений по рангам/группам матчмейкинга.
+	-- Table of MMV values ​​by ranks/matchmaking groups.
 	cvars.mm_mmvMdPenalty 		= "30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30"
-    -- Нижняя граница итогового MMV по рангам корабля, которая начинает действовать после порога боёв из mm_mmvMdBattles.
-    -- Не даёт штрафам и другим отрицательным поправкам опустить MMV ниже указанного значения.
-    -- Задаётся списком чисел: первое число для 1-го ранга, второе для 2-го и т. д.; количество значений должно совпадать с mm_mmvMdBattles.
+    -- The lower limit of the final MMV by ship rank, which begins to take effect after the battle threshold from mm_mmvMdBattles.
+    -- Prevents penalties and other negative adjustments from lowering the MMV below the specified value.
+    -- Specified by a list of numbers: the first number for the 1st rank, the second for the 2nd, etc.; the number of values ​​must match mm_mmvMdBattles.
     cvars.mm_mmvMin 			= "30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30"
-  	-- Верхняя граница итогового MMV для игроков с уникальным fingerprint ПК, пока у них меньше боёв, чем порог из mm_mmvMdBattles.
-  	-- Ограничивает, насколько высоко матчмейкинг может оценить нового игрока по его статистике.
-  	-- Задаётся списком чисел по рангам; если список заполнен, его длина должна совпадать с mm_mmvMdBattles.
+  	-- The upper limit of the final MMV for players with a unique PC fingerprint, as long as they have fewer battles than the threshold from mm_mmvMdBattles.
+  	-- Limits how highly matchmaking can rank a new player based on his stats.
+  	-- Specified by a list of numbers by rank; if the list is full, its length must match mm_mmvMdBattles.
   	cvars.mm_mmvMdUniqFingerprintClamp = "30,30,30,30,30,30,30,80,80,80,80,80,80,80,80,80,80,80"
 
-	-- Время ожидания keep-alive от клиента после подключения; если ответа нет, клиента отключают.
+	-- Waiting time for keep-alive from the client after connecting; if there is no response, the client is disconnected.
 	cvars.sm_initialKeepAliveTime = 120
 
-	-- Интервал, с которым shard-сервер проверяет в хранилище отложенные административные задачи и берёт их в работу.
-	-- Чем меньше значение, тем быстрее задачи начнут выполняться, но тем чаще будут опросы хранилища.
-	-- Указывается в секундах; допустимый диапазон: 0.01..5.
+	-- The interval at which the shard server checks pending administrative tasks in the storage and starts working on them.
+	-- The lower the value, the faster tasks will begin to execute, but the more often the storage will be polled.
+	-- Specified in seconds; allowed range: 0.01..5.
 	cvars.ctm_taskRecoveryInterval	= 5
 
 	-- WINGS
-  	-- Максимальный размер обычного отряда, который ещё не считается wing-группой.
-  	-- Если при приглашении игроков этот лимит будет превышен, нужно создавать wing-группу.
+  	-- The maximum size of a regular squad that is not yet considered a wing group.
+  	-- If this limit is exceeded when inviting players, you need to create a wing group.
   	cvars.squad_maxNonWingSize 		= 4
-  	-- Максимальный размер wing-группы при приглашении игроков в отряд.
-  	-- После достижения этого лимита новых участников добавить в wing нельзя.
+  	-- The maximum size of a wing group when inviting players to a squad.
+  	-- Once this limit is reached, new members cannot be added to wing.
   	cvars.squad_maxWingSize    		= 12
-  	-- Минимальный размер wing-группы для входа в sector-очерь матчмейкера.
-  	-- Отряды меньше этого размера не будут приняты в режимы, где требуется sector-wing.
+  	-- The minimum size of a wing group to enter the matchmaker's sector queue.
+  	-- Units smaller than this size will not be accepted into modes that require sector-wing.
   	cvars.mm_sectorMinWingSize 		= 5
-  	-- Максимальный размер wing-группы для sector-очерей матчмейкера.
-  	-- Отряды больше этого размера не будут приняты в режимы, где требуется sector-wing.
+  	-- The maximum size of a wing group for a matchmaker's sector queues.
+  	-- Units larger than this size will not be accepted into modes that require sector-wing.
   	cvars.mm_sectorMaxWingSize 		= 8
-  	-- Минимальный размер wing-группы для входа в raid-очерь матчмейкера.
-  	-- Отряды меньше этого размера не смогут встать в raid-очерь.
+  	-- The minimum size of a wing group to enter a matchmaker's raid queue.
+  	-- Units smaller than this size will not be able to join the raid queue.
   	cvars.mm_raidMinWingSize		= 10
 
-	-- Фильтр состава групп для raid-очерей: задаёт, кто может вставать в рейд — одиночные игроки, обычные отряды и/или wing-группы.
-	-- 0 - все типы составов: solo, обычные отряды и wing.
-	-- 1 - только solo; любые отряды и wing в raid-очерь не пускаются.
-	-- 2 - solo и обычные отряды; wing-группы не пускаются.
-	-- 3 - обычные отряды и wing; solo-игроки не пускаются.
-	-- 4 - только wing; solo и обычные отряды не пускаются.
-	-- Для режимов с wing дополнительно действует минимальный размер из mm_raidMinWingSize.
+	-- Group composition filter for raid queues: sets who can join the raid - single players, regular squads and/or wing groups.
+	-- 0 - all types of squads: solo, regular squads and wing.
+	-- 1 - solo only; Any units and wings are not allowed into the raid queue.
+	-- 2 - solo and regular units; wing groups are not allowed.
+	-- 3 - regular units and wing; Solo players are not allowed.
+	-- 4 - wing only; solo and regular units are not allowed.
+	-- For modes with wing, the minimum size from mm_raidMinWingSize additionally applies.
 	cvars.mm_raidSquadFilter = 0
 
-	-- Включает PvE-рейды в матчмейкере.
+	-- Enables PvE raids in matchmaker.
 	cvars.mm_enablePveRaids			= 1
   
-  	-- Допустимая разница рангов в отряде для не-arcade режимов.
+  	-- Allowable difference in ranks in a squad for non-arcade modes.
   	cvars.mm_notArcadeSquadRankDiff = 17
 
-	-- Интервал в днях, через который игроку снова выдаются loot-ауры для raid-миссий.
-	-- Проверка и выдача происходят при первом входе игрока в эти сутки.
-	-- Значение 1 означает ежедневную выдачу; 3 — раз в три дня.
+	-- The interval in days after which the player is again given loot auras for raid missions.
+	-- Verification and issuance occur upon the player’s first login that day.
+	-- A value of 1 means daily issuance; 3 - once every three days.
 	cvars.raid_lootAuraInterval 	= 1
 
-	-- Время начала события с кредитами. (тип: строка)
+	-- Start time of the event with credits. (type: string)
 	cvars.store_creditsEventStart		= creditsEventStart
-	-- Время окончания события с кредитами. (тип: строка)
+	-- End time of the event with credits. (type: string)
 	cvars.store_creditsEventEnd			= creditsEventEnd
 
 	-- Trade
-  	-- Максимальная сумма одной транзакции/письма. (тип: целое число)	
+  	-- Maximum amount of one transaction/letter. (type: integer)
   	cvars.store_maxTransactionSum 	= 20000
-	-- Минимальное значение антибот-счётчика для отправки почты. (тип: целое число; диапазон: 0..100)
+	-- Minimum anti-bot counter value for sending mail. (type: integer; range: 0..100)
 	cvars.shard_minAntibotCounterForMailSending = 50
 
-	-- Включает детальный лог решения при попытке игрока или отряда встать в очередь матчмейкера.
-	-- 0 - лог выключен, любое число больше 0 - лог включён.
+	-- Includes a detailed decision log when a player or squad tries to join the matchmaker's queue.
+	-- 0 - log is disabled, any number greater than 0 - log is enabled.
 	cvars.mm_decisionLog		= 0
 	
-  	-- Лимит одинаковых unique-модулей на один корабль; отдельно задаётся для обычных и premium-кораблей.
+  	-- Limit of identical unique modules per ship; is set separately for regular and premium ships.
   	-- Balanse rule
   	cvars.store_maxUniqueModules = 3
-  	-- Лимит одинаковых unique-модулей на один корабль; отдельно задаётся для обычных и premium-кораблей.
-  	-- #0098493: Сделать возможнсть установки экспериментальных модулей на прем. и ДЛЦ корабли в кол-ве 1 шт
+  	-- Limit of identical unique modules per ship; is set separately for regular and premium ships.
+  	-- #0098493: Make it possible to install experimental modules on premium. and DLC ships in quantity 1 piece
   	cvars.store_maxUniqueModulesOnPremium = 2
 	
-	-- Список offerId офферов, которые нужно включить на shard-сервере.
-	-- Идентификаторы берутся из файла offers.xml в этой же папке: ищите атрибут offerId у нужного оффера.
-	-- Формат: числа через запятую, пробел или табуляцию; пустая строка отключает все офферы.
+	-- List of offerIds of offers that need to be enabled on the shard server.
+	-- Identifiers are taken from the offers.xml file in the same folder: look for the offerId attribute of the desired offer.
+	-- Format: numbers separated by commas, spaces or tabs; an empty line disables all offers.
 	cvars.sv_offerEnable = "6,7,17,18,19"
 	
-	-- Максимальная сумма одной транзакции/письма. (тип: целое число)
+	-- Maximum amount of one transaction/letter. (type: integer)
 	cvars.store_maxTransactionSum 	= 20000
 	
 	-- brawl
 	-- SC-112207
 	local brawlSchedule =
 	{
-		-- Расписание задается на 28 дней.
-		-- (условной точкой отсчета считается первый понедельник 2018г.)
-		-- Гейплеи потасовок: "football", "gtdm", "hunger_games", "one_against_all", "sentinel", "capture_the_base", "atdm", "zombie", "close_distance", "autogen_dm", "three_teams_dm", "april_control"
+		-- The schedule is set for 28 days.
+		-- (the reference point is the first Monday of 2018)
+		-- Brawl gameplays: "football", "gtdm", "hunger_games", "one_against_all", "sentinel", "capture_the_base", "atdm", "zombie", "close_distance", "autogen_dm", "three_teams_dm", "april_control"
 
-		-- интервалы не обязательно прописывать в отсортированном порядке
-		-- последний интервал дня может быть с переходом на другие сутки - {23,1} ("кроме перехода с воскресенья на понедельник следующей недели" - не актуально-)
-		-- интервалы в течение одного дня пересекаться не должны 
-		-- дни дублироваться не должны
+		-- intervals do not have to be written in sorted order
+		-- the last interval of the day can be with a transition to another day - {23,1} ("except for the transition from Sunday to Monday of the next week" - not relevant-)
+		-- intervals within one day should not overlap
+		-- days should not be duplicated
 
 		--[[{ days = { 1,  8, 15, 22 },	time_intervals = { {2,3}, {10,11}, {14,15}, {17,18}, {21,22} }, gameplay = "football"		},
 		{ days = { 2, 7, 9, 16, 23 },	time_intervals = { {2,3}, {10,11}, {14,15}, {17,18}, {21,22} }, gameplay = "one_against_all"	},
@@ -257,34 +257,34 @@ function ConfigureShard()
 	}
 	_G.BrawlManager_SetupSchedule( brawlSchedule )
 	
-	-- Максимальный шанс получить бонусный набор при покупке набора; шанс умножается на коэффициент (prestige / maxPrestige). (тип: дробное число; диапазон: 0.0f..1.0f)
+	-- Maximum chance to receive a bonus set when purchasing a set; the chance is multiplied by a coefficient (prestige / maxPrestige). (type: fractional number; range: 0.0f..1.0f)
 	cvars.store_bonusBundleChancePercentageMax = 0.2
   
-  	-- Premium-время, выдаваемое за ранг аккаунта. (тип: целое число)
-  	-- премиум (в секундах, по умолчанию - день)
+  	-- Premium time awarded for account rank. (type: integer)
+  	-- premium (in seconds, default - day)
   	cvars.premiumTimeForAccountRank = 1 * 24 * 60 * 60
   
-	-- Дневной лимит token credits, которые игрок может заработать за день.
+	-- Daily limit of token credits that a player can earn per day.
 	-- #106983
 	cvars.sv_tokenCreditsDailyLimit = 1000
 
-	-- список запрещенного оборудования (кораблей и модулей) в лигах
+	-- list of prohibited equipment (ships and modules) in leagues
 	Shard_SetupLeagueForbiddenEquipment( leagueForbiddenDefs )
 	
 	_G.Shard_SetupBattlePassActivation( battlePassStart, battlePassEndTable )
 
-	-- Время, с которого появляется кнопка разблокировки уровня battle pass. (тип: строка)
+	-- The time from which the battle pass level unlock button appears. (type: string)
 	cvars.store_battlePassUnlockLvlBtnStart = "2023-07-14T00:00:00Z"
 
-	-- Адаптивные пресеты ботов.
-	-- Коэффициент увеличения BFL-роли. (тип: дробное число)
+	-- Adaptive bot presets.
+	-- BFL role increase factor. (type: fractional number)
 	-- bfl - battle time for life time
-	-- цвар на увеличение статистики пресетов SC-115316
+	-- Tsvar to increase the statistics of presets SC-115316
 	cvars.sm_bflRoleInc = 0.5
-	-- Коэффициент уменьшения BFL-роли. (тип: дробное число)
-	-- цвар на уменьшение статистики пресетов
+	-- BFL role reduction factor. (type: fractional number)
+	-- tsvar to reduce preset statistics
 	cvars.sm_bflRoleDec = 0.05
-	-- Количество адаптивных пресетов, сохраняемых в БД. 0 - очищает данные. (тип: целое число; диапазон: 0..1000)
+	-- The number of adaptive presets saved in the database. 0 - clears data. (type: integer; range: 0..1000)
 	cvars.sm_numAdaptivePresetsToSaveDB = numAdaptivePresets
 end
 
@@ -349,7 +349,7 @@ function ConfigureMatchmaker()
 	-- s1340_aliendestsatation
 
 
-	-- Тип адаптивных пресетов ботов.
+	-- Type of adaptive bot presets.
 	local bpt_none = 0
 	local bpt_mirror = 1
 	local bpt_adaptive = 2
@@ -879,17 +879,17 @@ function ConfigureMatchmaker()
 
 	-- low online queues
 	MatchMaker_ReconfigureQueues( queuesConfigLo, true )
-	-- Переход в режим низкого онлайна, если онлайн меньше этого значения. (тип: целое число)
+	-- Switch to low online mode if online is less than this value. (type: integer)
 	cvars.mm_lowOnlineLo = 250
-	-- Выход из режима низкого онлайна, если онлайн не меньше этого значения. (тип: целое число)
+	-- Exit low online mode if online is not less than this value. (type: integer)
 	cvars.mm_lowOnlineHi = 300
 
-	-- Количество ботов. (тип: целое число; диапазон: 0..31)
-	-- Базовое количество ботов; в конкретной очереди может быть переопределено.
+	-- Number of bots. (type: integer; range: 0..31)
+	-- Base number of bots; can be overridden in a specific queue.
 	cvars.mm_botsCount = 16
 
-	-- Базовый игровой режим для новой игровой сессии; в конкретной очереди может быть переопределён.
-	-- Возможные значения (не все работают):
+	-- Basic game mode for a new gaming session; can be overridden in a specific queue.
+	-- Possible values ​​(not all work):
 	-- 0 - none
 	-- 1 - space battle
 	-- 2 - capture the flag
@@ -924,29 +924,29 @@ function ConfigureMatchmaker()
 	-- 31 - april control
 	cvars.mm_defaultGameplay		= 3
 
-	-- Чем больше значение, тем плавнее и медленнее меняется среднее время в очереди. (тип: целое число; диапазон: 2..10000)
+	-- The larger the value, the smoother and slower the average queue time changes. (type: integer; range: 2..10000)
 	-- 10 for dev/test, >100 for live
 	cvars.mm_timeInQueueAveragingCf	= 200
 
-	-- Множители выдаваемого опыта по рангам, список через запятую. (тип: строка)
+	-- Multipliers of experience given by rank, list separated by commas. (type: string)
 	-- reward multiplication rates
 	cvars.rate_exp					= "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1"
-	-- Множители выдаваемых кредитов по рангам, список через запятую. (тип: строка)
+	-- Multipliers of issued loans by rank, list separated by commas. (type: string)
 	cvars.rate_cred					= "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1"
 
-	-- Детальность decision-log внутри матчмейкера. Это битовая маска: чтобы включить несколько категорий, сложите их числа.
-	-- 0 - выключено; 1 - базовые PvP-решения; 2 - PvP join-in-progress; 4 - PvP-кандидаты.
-	-- 8 - coop; 16 - coop join-in-progress; 32 - PvE; 64 - universe; 128 - brawl; 256 - brawl-кандидаты.
-	-- 512 - hunger games; 1024 - one against all; 2048 - zombie; 4096 - three teams; 8192 - close distance; 16384 - общие решения.
-	-- Пример: 33 включит базовый PvP-лог и PvE-лог (1 + 32). Все категории: 32767.
+	-- Decision-log detail inside the matchmaker. This is a bitmask: to include multiple categories, add their numbers together.
+	-- 0 - disabled; 1 - basic PvP solutions; 2 - PvP join-in-progress; 4 - PvP candidates.
+	-- 8 - coop; 16 - coop join-in-progress; 32 - PvE; 64 - universe; 128 - brawl; 256 - brawl candidates.
+	-- 512 - hunger games; 1024 - one against all; 2048 - zombie; 4096 - three teams; 8192 - close distance; 16384 - general solutions.
+	-- Example: 33 will enable the base PvP log and the PvE log (1 + 32). All categories: 32767.
 	cvars.mm_decisionLog			= 0
-	-- Способ вывода decision-log матчмейкера.
-	-- 0 - накапливать строки лога и выводить их одним блоком в info-лог после окончания разбора записей.
-	-- 1 - писать каждое сообщение сразу в debug-лог; удобно для онлайн-отладки, но может давать много записей.
+	-- Method for outputting decision-log matchmaker.
+	-- 0 - accumulate log lines and output them in one block to the info log after the parsing of records is completed.
+	-- 1 - write each message directly to the debug log; convenient for online debugging, but can produce a lot of entries.
 	cvars.mm_decisionDbg			= 0
 
 	local reward_mult = {
-		-- day = 0; понедельник начинается с 0
+		-- day = 0; Monday starts at 0
 		[ 0 ] =
 		{
 			{ hourBegin = 0, hourEnd = 1, rateExp = "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1", rateCred = "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1", },
@@ -963,7 +963,7 @@ function ConfigureMatchmaker()
 	MatchMaker_SetRewardRates( reward_mult )
 	
 	
-	-- расписание pve-миссий для выбора игроком
+	-- pve mission schedule for player selection
 	local pveSchedule =
 	{
 		rotatingLevels =
@@ -983,7 +983,7 @@ function ConfigureMatchmaker()
 		},
 		
 		maxRotatingLevels	= 12,
-		rotationTime		= 2 * 60 * 60,	--[сек]
+		rotationTime		= 2 * 60 * 60,	--[sec]
 
 		permanentLevels =
 		{
@@ -997,8 +997,8 @@ end
 
 function ConfigureAdventureServer()
 
-  -- Включает/выключает сохранение предложений adventure-giver в базу данных. (тип: логический)
-  -- при 1 - сохраняются предложения, при 0 - не сохраняются
+  -- Enables/disables saving adventure-giver offers to the database. (type: boolean)
+  -- at 1 - sentences are saved, at 0 - not saved
   cvars.adventure_saveGiverOffers = 0
 
 end
@@ -1006,163 +1006,163 @@ end
 
 --
 function ConfigureScriptsServer()
-	-- Должен ли экземпляр зоны обмениваться данными с сервером скриптов. (тип: логический)
+	-- Whether the zone instance should communicate with the script server. (type: boolean)
 	cvars.sv_enableCommunticationWithSS = 1
 
-	-- Отключает проверку формата Lua-данных (например playerLuaData зоны) при их конвертации и сохранении в базу.
-	-- 1 - данные записываются без сверки со схемой; работает только на не-live сборках (тест/отладка).
+	-- Disables checking the format of Lua data (for example, playerLuaData zone) when converting and saving it to the database.
+	-- 1 - data is recorded without checking the diagram; works only on non-live builds (test/debug).
 	--cvars.dbg_disableLuaDataFormatChecking = 1
 	
-	--передаем SS дефолтные настройки, например "идет эвент "зеленая война" уровня "хард" "
+	--we pass the default settings to SS, for example “there is a “green war” event at the “hard” level”
 	if ScriptsServer and ScriptsServer.ConfigureGlobalEvents then
-						-- Зеленые:
-						--7 пре евент
-						--2 владение
-						--1 вторжение
-						--6 таймер для вторжение GREEN_PRE_EXPANSION
-						--места столиц зеленых
---"ruinsbig_expanse_empty_tube_l_ow"  213 -- Заброшенный комплекс   -- за иерихоном 
---"wreck_emp_rock_02_r_ow" 11 -- Разрушенная лаборатория     -- империя - федерация
---"miners_fed_rock_01_l_ow" 224 --  Северная добывающая станция      федерация иерихон
+						-- Green:
+						--7 pre event
+						--2nd possession
+						--1 invasion
+						--6 timer for invasion GREEN_PRE_EXPANSION
+						--places of green capitals
+--"ruinsbig_expanse_empty_tube_l_ow" 213 -- Abandoned complex - behind Jericho
+--"wreck_emp_rock_02_r_ow" 11 -- Destroyed laboratory - empire - federation
+--"miners_fed_rock_01_l_ow" 224 -- Northern mining station Federation Jericho
 
 		ScriptsServer:ConfigureGlobalEvents( 
 			{ 
-			--Вариант на пре-эвент
+			--Pre-event option
 
 --[[ 				forceEvents = { -- 
 					{
 						-- ai.ZoneInstanceEvents.GREEN_PRE_EVENT
-						eventDefName = 7, -- деф эвента -- если нет, будет создан, если есть, то модифицируются упомянутые цифры
-						--disableCreate = true,	-- не делаем эвента, если нет его
-						--removeEvent 	= true,	-- если эвент есть, надо удалить евент
-						eventLocation = 11,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventDefName = 7, -- event def -- if not, it will be created, if there is, then the mentioned numbers are modified
+--disableCreate = true, -- don't create an event if it doesn't exist
+--removeEvent = true, -- if there is an event, remove the event
+eventLocation = 11, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 						newEventState = 1000,
 						--newEventState = -100501, -- TIMEOUT_EVENT		= -100501, 
 						--newEventState = 500,
-						--eventParams = {	},	-- какие перезаписать параметры
+--eventParams = { }, -- which parameters to overwrite
 					},
 					{
 						eventDefName = 7, --
 						newEventState = 1000,
-						eventLocation = 213,	-- в какую локацию 
+eventLocation = 213, -- to which location
 					},
 					{
 						eventDefName = 7, --
 						newEventState = 1000,
-						eventLocation = 224,	-- в какую локацию 
+eventLocation = 224, -- to which location
 					},
 				}, ]]
 
---Вариант "на старт"
+--Option "to start"
 --[[
 				forceEvents = { -- 
 					{
 						-- ai.ZoneInstanceEvents.GREEN_OWNERSHIP
-						eventDefName = 2, -- деф эвента -- если нет, будет создан, если есть, то модифицируются упомянутые цифры
-						--disableCreate = true,	-- не делаем эвента, если нет его
-						--removeEvent 	= true,	-- если эвент есть, надо удалить евент
-						eventLocation = 11,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventDefName = 2, -- event def -- if not, it will be created, if there is, then the mentioned numbers are modified
+--disableCreate = true, -- don't create an event if it doesn't exist
+--removeEvent = true, -- if there is an event, remove the event
+eventLocation = 11, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 						newEventState = 1000,
 						--newEventState = -100501, -- TIMEOUT_EVENT		= -100501, 
 						--newEventState = 500,
-						--eventParams = {	},	-- какие перезаписать параметры
+--eventParams = { }, -- which parameters to overwrite
 					},
 					{
 						eventDefName = 2, --
 						newEventState = 1000,
-						eventLocation = 213,	-- в какую локацию 
+eventLocation = 213, -- to which location
 					},
 					{
 						eventDefName = 2, --
 						newEventState = 1000,
-						eventLocation = 224,	-- в какую локацию 
+eventLocation = 224, -- to which location
 					},
 				},
 ]]
---Вариант "на старт" с контрударами (на ноябрь не готово) --!!!
+--Option "to start" with counterattacks (not ready for November) --!!!
 --[[
 				forceEvents = { -- 
 					{
 						-- ai.ZoneInstanceEvents.GREEN_OWNERSHIP
-						eventDefName = 2, -- деф эвента -- если нет, будет создан, если есть, то модифицируются упомянутые цифры
-						--disableCreate = true,	-- не делаем эвента, если нет его
-						--removeEvent 	= true,	-- если эвент есть, надо удалить евент
-						eventLocation = 11,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventDefName = 2, -- event def -- if not, it will be created, if there is, then the mentioned numbers are modified
+--disableCreate = true, -- don't create an event if it doesn't exist
+--removeEvent = true, -- if there is an event, remove the event
+eventLocation = 11, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 						newEventState = 1000,
 						--newEventState = -100501, -- TIMEOUT_EVENT		= -100501, 
 						--newEventState = 500,
-						--eventParams = {	},	-- какие перезаписать параметры
+--eventParams = { }, -- which parameters to overwrite
 					},
 					{
 						eventDefName = 2, --
 						newEventState = 1000,
-						eventLocation = 213,	-- в какую локацию 
+eventLocation = 213, -- to which location
 					},
 					{
 						eventDefName = 2, --
 						newEventState = 1000,
-						eventLocation = 224,	-- в какую локацию 
+eventLocation = 224, -- to which location
 					},
 					
 					{
-						eventDefName = 8,--8=управление контратакой -- деф эвента -- если нет, будет создан, если есть, то модифицируются упомянутые цифры
+eventDefName = 8,--8=counterattack control -- event def -- if not, it will be created, if there is, then the mentioned numbers are modified
 						--removeEvent 	= true,
-						eventLocation = 1,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
-						eventParams = {		-- какие перезаписать параметры
+eventLocation = 1, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
+eventParams = { -- which parameters to overwrite
 						},
 					},
 				},
 --]]
 			
--- мой дебаг
+-- my debug
 				--[[
 				forceEvents = { -- 
 					{
 						-- ai.ZoneInstanceEvents.GREEN_PRE_EVENT
-						eventDefName = 7, -- деф эвента -- если нет, будет создан, если есть, то модифицируются упомянутые цифры
-						--disableCreate = true,	-- не делаем эвента, если нет его
-						--removeEvent 	= true,	-- если эвент есть, надо удалить евент
-						eventLocation = 11,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventDefName = 7, -- event def -- if not, it will be created, if there is, then the mentioned numbers are modified
+--disableCreate = true, -- don't create an event if it doesn't exist
+--removeEvent = true, -- if there is an event, remove the event
+eventLocation = 11, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 						--newEventState = -100501, -- TIMEOUT_EVENT		= -100501, 
 						--newEventState = 500,
-						eventParams = {		-- какие перезаписать параметры
+eventParams = { -- which parameters to overwrite
 							},
 					},
 					{
-						eventDefName = 2, -- --2 владение Заброшенный комплекс   -- за иерихоном 
+eventDefName = 2, -- --2 possession Abandoned complex -- outside Jericho
 						newEventState = 1000,
-						eventLocation = 213,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventLocation = 213, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 					},
 					{
-						eventDefName = 1, -- 1 вторжение  --  Северная добывающая станция      федерация иерихон
-						eventLocation = 224,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventDefName = 1, -- 1 invasion -- Northern Mining Station Federation Jericho
+eventLocation = 224, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 					},
-					 --104        -- Пустошь  -- империя - федерация рядом с 11
-					-- готовятся к вторжению 6 GREEN_PRE_EXPANSION  Пустошь 
+--104 -- Wasteland -- empire - federation near 11
+-- preparing for invasion 6 GREEN_PRE_EXPANSION Wasteland
 					{
-						eventDefName = 6, -- готовятся к вторжению 6 GREEN_PRE_EXPANSION  --  Северная добывающая станция      федерация иерихон
-						eventLocation = 104,	-- в какую локацию  
-						newEventState = 60*60*3, -- 3 часа
+eventDefName = 6, -- preparing for invasion 6 GREEN_PRE_EXPANSION -- Northern mining station Jericho Federation
+eventLocation = 104, -- to which location
+newEventState = 60*60*3, -- 3 hours
 					},
 
 					{
-						eventDefName = 8,--8=управление контратакой -- деф эвента -- если нет, будет создан, если есть, то модифицируются упомянутые цифры
+eventDefName = 8,--8=counterattack control -- event def -- if not, it will be created, if there is, then the mentioned numbers are modified
 						--removeEvent 	= true,
-						eventLocation = 1,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
-						eventParams = {		-- какие перезаписать параметры
+eventLocation = 1, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
+eventParams = { -- which parameters to overwrite
 						},
 					},
 
 					{ --  234
-						eventDefName = 9, --  империя готовится к вторжению
-						newEventState = 60*60*3, -- 3 часа
+eventDefName = 9, -- the empire is preparing to invade
+newEventState = 60*60*3, -- 3 hours
 						eventLocation = 234,	--
 					},
 					
-					{ --  империя вторгается
-						eventDefName = 12, -- --2 владение Заброшенный комплекс   -- за иерихоном 
+{ -- the empire invades
+eventDefName = 12, -- --2 possession Abandoned complex -- outside Jericho
 						newEventState = 400, 
-						eventLocation = 212,	-- в какую локацию  ( 25 водосбор-пвп между федерацией - империей ) 231 - стартовая
+eventLocation = 212, -- to which location (25 catchment-pvp between federation - empire) 231 - starting
 					},
 				},
 				]]
@@ -1170,151 +1170,151 @@ function ConfigureScriptsServer()
 		--sys.log("test out2")
 		-- ScriptsServer:ConfigureGlobalEvents( { forceEvents = { { eventDefName = 4, eventLocation = 247, newEventState = 998, } } })
 		ScriptsServer:SetTimerScale( 1 ) 
-		--ScriptsServer:OnSetTimerScale( 60 * 60 )  --60 * 60    1 секунда= 1час   || не все параметры поддерживают ускорение.
+		--ScriptsServer:OnSetTimerScale( 60 * 60 ) --60 * 60 1 second= 1 hour || Not all options support acceleration.
 	end
 end
 
 
 --
 function ConfigureDediServer()
-	-- Ограничивает FPS этим значением; 0 — ограничение выключено. (тип: дробное число)
+	-- Limits FPS to this value; 0—restriction disabled. (type: fractional number)
 	cvars.cl_maxFps = 18
 
-	-- Отладка подключения к уже идущему бою. (тип: логический)
+	-- Debugging connection to an already ongoing battle. (type: boolean)
 	cvars.sv_dbgJoinInProgress			= 0
-	-- Логирование combat-событий в файл лога; каждый уровень включает все предыдущие.
-	-- 0 - отключено; 1 - убийства/смерти/награды; 2 - +использование модулей, ракет и аур.
-	-- 3 - +весь урон; 4 - +коэффициенты параметров геймплейных аур.
+	-- Logging combat events to a log file; each level includes all previous ones.
+	-- 0 - disabled; 1 - kills/deaths/rewards; 2 - +use of modules, missiles and auras.
+	-- 3 - +all damage; 4 - +coefficients of gameplay aura parameters.
 	cvars.cl_combatLog					= 0
-	-- Логирование протокола базы данных: 1 — краткое, 2 — полное. (тип: целое число)
+	-- Database protocol logging: 1 - short, 2 - full. (type: integer)
 	-- to catch some nasty stuff
 	cvars.db_logMessages				= 0
-	-- Переопределяет игровую настройку штрафа времени возрождения за смерть. (тип: дробное число)
+	-- Overrides the game's respawn time penalty for death setting. (type: fractional number)
 	-- to use gameplaysettings values
 	cvars.sv_respawnTimePenalty			= -1
-	-- Время в секундах, через которое игрок кикается за AFK, если он не присылал управляющие ввод или они не менялись.
-	-- Большое значение (напр. 3600) фактически отключает AFK-кик. (тип: дробное число)
+	-- Time in seconds after which a player kicks for AFK if he did not send control inputs or they did not change.
+	-- A high value (eg 3600) actually disables AFK kick. (type: fractional number)
 	cvars.sv_afkCheckDuration			= 120
-	-- Включает/выключает послебоевой loot. (тип: логический)
+	-- Enables/disables post-battle loot. (type: boolean)
 	--
 	cvars.sv_lootEnabled				= 1
-	-- Шанс ничего не найти. (тип: дробное число; диапазон: 0.0f..1.0f)
+	-- Chances are you won't find anything. (type: fractional number; range: 0.0f..1.0f)
 	cvars.sv_lootFailChance				= 0.0
-	-- Время сканирования в секундах. (тип: дробное число)
+	-- Scan time in seconds. (type: fractional number)
 	cvars.sv_lootScanTime				= 1
-	-- Длительность стадии сбора loot. (тип: дробное число)
+	-- Duration of the loot collection stage. (type: fractional number)
 	cvars.sv_lootDuration				= 120
 
-	-- SC-112454 сид-чипы
+	-- SC-112454 seed chips
 	cvars.sv_autogenModulesEnabled 		= 1
-	-- Где показывать сид-чипы: 1 - только в игре, 2 - в игре и в ангаре.
-	-- 1 — в игре, 2 — в игре и в ангаре. (тип: целое число)
+	-- Where to show seed chips: 1 - only in the game, 2 - in the game and in the hangar.
+	-- 1 - in the game, 2 - in the game and in the hangar. (type: integer)
 	cvars.sv_dbgAutogenDefs 			= 2
 
-	-- Коэффициент обычной salvage-конвертации найденного loot-предмета в токены.
-	-- Возврат считается от tokenPrice предмета: tokensRefund = tokenPrice * sv_salvageTokenConversion. (тип: дробное число)
+	-- The coefficient of the usual salvage conversion of a found loot item into tokens.
+	-- The refund is calculated from the tokenPrice of the item: tokensRefund = tokenPrice * sv_salvageTokenConversion. (type: fractional number)
 	cvars.sv_salvageTokenConversion		= 0.2
-	-- Коэффициент premium salvage-конвертации найденного loot-предмета в токены.
-	-- Premium-вариант требует оплату premium-валютой и возвращает токены по формуле: tokensRefund = tokenPrice * sv_salvagePremiumTokenConversion. (тип: дробное число)
+	-- Premium salvage conversion rate of a found loot item into tokens.
+	-- The premium option requires payment in premium currency and returns tokens using the formula: tokensRefund = tokenPrice * sv_salvagePremiumTokenConversion. (type: fractional number)
 	cvars.sv_salvagePremiumTokenConversion	= 0.6
-	-- Коэффициент стоимости premium salvage для найденного loot-предмета.
-	-- Цена premium-варианта считается от обычной цены предмета: premiumPrice = price * sv_salvagePremiumPriceConversion. (тип: дробное число)
+	-- Premium salvage cost coefficient for a found loot item.
+	-- The price of the premium option is calculated from the regular price of the item: premiumPrice = price * sv_salvagePremiumPriceConversion. (type: fractional number)
 	cvars.sv_salvagePremiumPriceConversion = 0.0008
 
-	-- Коэффициент награды для BFS-боя wing vs wing. (тип: дробное число; диапазон: 1.0f..10.0f)
+	-- Reward coefficient for BFS battle wing vs wing. (type: fractional number; range: 1.0f..10.0f)
 	cvars.sv_universeWingVsWingRewardCf = 2.0
-	-- Принудительный режим управления кораблём. (тип: целое число; диапазон: -1..5)
-	-- Значения: -1 — не форсировать; 0 — FOLLOWING; 1 — COMBINED; 2 — LOCAL_TURRET; 3 — REMOTE_TURRET; 4 — LANDED; 5 — WOW.
+	-- Forced mode of ship control. (type: integer; range: -1..5)
+	-- Values: -1 — do not force; 0 — FOLLOWING; 1 - COMBINED; 2 - LOCAL_TURRET; 3 - REMOTE_TURRET; 4 - LANDED; 5 - WOW.
 	cvars.ship_controlForceMode			= -1
-	-- Особый режим поворота UFO-корабля по оси X.
+	-- A special mode for rotating the UFO ship along the X axis.
 	-- UFO ship controls
 	cvars.ship_ufoRotateX = 1
-	-- Включает/выключает игровые достижения. (тип: логический)
+	-- Enables/disables game achievements. (type: boolean)
 	cvars.sv_achievementEnabled			= 1
-	-- Минимальный интервал отправки прогресса игрока на сервер достижений, в секундах. (тип: дробное число)
+	-- Minimum interval for sending player progress to the achievement server, in seconds. (type: fractional number)
 	cvars.sv_achievProgressTimer		= 3
 
-	-- Включает событие «День космонавтики». (тип: логический)
+	-- Includes the Cosmonautics Day event. (type: boolean)
 	-- EVENTS
 	cvars.event_cosmonauticsDay	 		= 0
-	-- Включает событие «Годовщина игры». (тип: логический)
+	-- Includes the Game Anniversary event. (type: boolean)
 	cvars.event_gameAnniversary			= 0
-	-- Включает событие «23 февраля». (тип: логический)
+	-- Includes the February 23rd event. (type: boolean)
 	cvars.event_february23				= 0
-	-- Включает событие «8 марта». (тип: логический)
+	-- Includes the March 8th event. (type: boolean)
 	cvars.event_march8					= 0
-	-- Включает событие с префиксом ботов. (тип: логический)
+	-- Includes an event with the bot prefix. (type: boolean)
 	cvars.event_botPrefix				= 0
-	-- Включает событие Claws. (тип: логический)
+	-- Enables the Claws event. (type: boolean)
 	cvars.event_claws					= 0
-	-- Включает событие «День знаний». (тип: логический)
+	-- Includes the Knowledge Day event. (type: boolean)
 	cvars.event_knowledgeDay			= 0
-	-- Включает событие Halloween. (тип: целое число)
+	-- Includes the Halloween event. (type: integer)
 	cvars.event_halloween				= 0
-    -- Включает событие вторжения в PvP. (тип: логический)
+    -- Enables PvP invasion event. (type: boolean)
     cvars.event_invasionPVP				= 0
-	-- Включает событие «День святого Валентина». (тип: логический)
+	-- Includes the Valentine's Day event. (type: boolean)
 	cvars.event_valentinesDay 			= 0
-	-- Включает AI-логику кораблей. (тип: логический)
+	-- Enables AI logic for ships. (type: boolean)
 	--DEBUG
 	cvars.ship_aiThink					= 1
-	-- Коэффициент награды свободной синергии. (тип: дробное число)
+	-- Free synergy reward coefficient. (type: fractional number)
 	cvars.sv_freeSynergyRewardCf		= 0.05
-	-- Коэффициент награды свободной синергии для premium-корабля. (тип: дробное число)
+	-- Free synergy reward coefficient for a premium ship. (type: fractional number)
 	cvars.sv_freeSynergyRewardCfPremiumVessel	= 0.2
-	-- Дополнительный коэффициент опыта синергии за убийство/помощь с gold munition. (тип: дробное число)
+	-- Additional synergy experience coefficient for kill/assist with gold munition. (type: fractional number)
 	cvars.sv_goldMunitionExpRewardCf	= 1.0
 
-	-- Бюджет времени для инкрементальной работы Lua GC, в микросекундах. (тип: целое число)
+	-- Time budget for Lua GC incremental work, in microseconds. (type: integer)
 	cvars.script_gcWorkBudget			= 1
 
-  	-- Множитель опыта за первую PvE-победу дня. (тип: дробное число)
+  	-- Experience multiplier for the first PvE victory of the day. (type: fractional number)
 	-- x3 FIRST WIN
   	cvars.sv_dailyWinPveExpRewardCf	 	= x3fw
-	-- Множитель опыта за первую PvP-победу дня. (тип: дробное число)
+	-- Experience multiplier for the first PvP victory of the day. (type: fractional number)
 	cvars.sv_dailyWinPvpExpRewardCf		= x3fw
-  	-- Множитель опыта за первую coop-победу дня. (тип: дробное число)
+  	-- Experience multiplier for the first co-op victory of the day. (type: fractional number)
   	cvars.sv_dailyWinCoopExpRewardCf	= x3fw
-  	-- Множитель опыта за первую brawl-победу дня. (тип: дробное число)
+  	-- Experience multiplier for the first brawl victory of the day. (type: fractional number)
   	cvars.sv_dailyWinBrawlExpRewardCf 	= x3fw
 
-  	-- Шанс выдачи event-label (пометки корабля как агента события для игрока) для PvP-боёв.
-  	-- Задаётся по рангам как список из 18 дробных чисел от 0 до 1; первое число для 1-го ранга, второе для 2-го и т. д. (тип: строка)
+  	-- Chance of issuing an event-label (marking a ship as an event agent for the player) for PvP battles.
+  	-- Specified by rank as a list of 18 fractional numbers from 0 to 1; the first number is for rank 1, the second is for rank 2, etc. (type: string)
   	cvars.sv_pvpLabelChances			= "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
-    -- То же, что и sv_pvpLabelChances, но для PvE-миссий и рейдов. (тип: строка)
+    -- Same as sv_pvpLabelChances, but for PvE missions and raids. (type: string)
     cvars.sv_pveLabelChances			= "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
 
- 	-- Количество попыток выбора rare-таблицы loot с плавающими шансами. (тип: целое число)
+ 	-- The number of attempts to select a rare loot table with floating odds. (type: integer)
  	-- rare_limit
  	cvars.sv_rarePicksNumberWithFloatingChances = 100
-    -- Количество попыток выбора epic-таблицы loot с плавающими шансами. (тип: целое число)
+    -- The number of attempts to select an epic loot table with floating odds. (type: integer)
     -- epic_limit
     cvars.sv_epicPicksNumberWithFloatingChances = 150
-    -- Базовый шанс выбрать rare-таблицу loot. (тип: дробное число)
+    -- Base chance to select rare loot table. (type: fractional number)
     cvars.sv_overlootedRarePickChance = 0.2
-    -- Базовый шанс выбрать epic-таблицу loot. (тип: дробное число)
+    -- Base chance to select epic loot table. (type: fractional number)
     cvars.sv_overlootedEpicPickChance = 0.05
-    -- Базовый шанс выбрать common-таблицу loot. (тип: дробное число)
+    -- Base chance to select a common loot table. (type: fractional number)
     -- common_default_weight
     cvars.sv_lootCommonPickChance = 0.95
-  	-- Ограничивает rare- и epic-таблицы loot только кораблями максимального уровня. (тип: логический)
+  	-- Limits the rare and epic loot tables to only ships of the maximum level. (type: boolean)
   	-- max rank ships for loot
   	cvars.sv_lootMaxLevelRestriction = 0
 
-	-- Множитель A в формуле веса выбора rare/epic loot-таблицы. (тип: дробное число)
+	-- Multiplier A in the selection weight formula of the rare/epic loot table. (type: fractional number)
 	cvars.sv_lootRuleCfA = 0.25
-	-- Базовый вес B (свободный член) в формуле веса rare/epic loot-таблицы. (тип: дробное число)
+	-- Base weight B (free member) in the weight formula of the rare/epic loot table. (type: fractional number)
 	cvars.sv_lootRuleCfB = 0.25
-	-- Сдвиг offset: корректирует порог attempts, с которого начинает расти плавающий шанс rare/epic. (тип: дробное число)
-	-- Формула: weight = max(0, sv_lootRuleCfA * (attempts - (it + sv_lootRuleCfOffset)) + sv_lootRuleCfB).
-	-- attempts - число попыток без rare/epic; it - порог из iter в loot-правиле для текущей по счёту выдачи.
+	-- Shift offset: adjusts the attempts threshold from which the rare/epic floating chance begins to grow. (type: fractional number)
+	-- Formula: weight = max(0, sv_lootRuleCfA * (attempts - (it + sv_lootRuleCfOffset)) + sv_lootRuleCfB).
+	-- attempts - number of attempts without rare/epic; it is the threshold from iter in the loot rule for the current issue.
 	cvars.sv_lootRuleCfOffset = -1
 
-	-- Путь для сохранения replay dedicated-сервера. (тип: строка)
+	-- Path to save the replay dedicated server. (type: string)
 	cvars.sv_autorecordReplaysTo = ""
 	
-	-- Время начала кастомного события. (тип: строка)
-	-- "Необходимо изменять время начала и конца кратно часу, иначе квест imaginary может вести себя
+	-- Start time of the custom event. (type: string)
+	-- "It is necessary to change the start and end times in multiples of an hour, otherwise the imaginary quest may behave
 	cvars.event_custom 			= event_custom
 	
 	
@@ -1339,74 +1339,74 @@ function ConfigureDediServer()
 	}
 	)
 
-	-- список запрещенного оборудования (кораблей и модулей) в лигах; раскомментируйте и заполните, если нужен
+	-- list of prohibited equipment (ships and modules) in leagues; uncomment and fill in if necessary
 	--DedicatedServerServices_SetupLeagueForbiddenEquipment( leagueForbiddenDefs )
 
-	-- список запрещённых дефов для адаптивных пресетов ботов
+	-- list of prohibited defs for adaptive bot presets
 	_G.DedicatedServerServices_SetupBotPresetForbidden( botPresetForbiddenDefs )
 
-	-- Кикать ли игроков из боя, если ботов стало больше, чем игроков.
+	-- Should players be kicked out of battle if there are more bots than players?
 	cvars.sv_kickExcessiveBotsEnabled = 1
 
-	-- Количество лучших игроков, чьи корабли сохраняются для адаптивных пресетов; -1 — все игроки и все корабли. (тип: целое число; диапазон: -1..MAX_PLAYERS)
-	-- количество сохранения лучших игроков SC-115316
+	-- The number of best players whose ships are saved for adaptive presets; -1 - all players and all ships. (type: integer; range: -1..MAX_PLAYERS)
+	-- number of saving the best players SC-115316
 	cvars.sv_numBestPlayerToSave = 2
-	-- Минимальная эффективность корабля для сохранения в базу адаптивных пресетов. (тип: целое число)
-	-- минимальное количество очков для сохранения пресета корабля лучшего игрока
+	-- Minimum ship efficiency for saving adaptive presets to the database. (type: integer)
+	-- minimum number of points to save the best player's ship preset
 	cvars.sv_minEfficiencyVesselToSave = 1500
-	-- Лимит записей адаптивных пресетов в БД для режима, ранга и роли; 0 очищает базу.
+	-- Limit of records of adaptive presets in the database for mode, rank and role; 0 clears the database.
 	cvars.sv_numAdaptivePresetsInDB = numAdaptivePresets
-	-- Лимит от 0 до 100 на чтение из базы адаптивных пресетов для ранга и роли игрового режима. (тип: целое число; диапазон: 0..100)
-	-- сколько уникальных пресетов запрашивает дедик с базы
+	-- Limit from 0 to 100 for reading from the database of adaptive presets for the rank and role of the game mode. (type: integer; range: 0..100)
+	-- how many unique presets does Dedik request from the database?
 	cvars.sv_numUniqueAdaptivePresets = 20
-	-- Диапазон рангов от 0 до MAX_SHIP_RANK для чтения из базы адаптивных пресетов. (тип: целое число; диапазон: 0..MAX_SHIP_RANK)
-	-- разница запрашиваемых рангов пресетов с базы от максимального ранга очереди ( если максимальный ранг 12, то при цваре 3, минимальный ранг будет 9 )
+	-- The range of ranks is from 0 to MAX_SHIP_RANK for reading from the adaptive presets database. (type: integer; range: 0..MAX_SHIP_RANK)
+	-- the difference between the requested ranks of presets from the database and the maximum rank of the queue (if the maximum rank is 12, then with a color of 3, the minimum rank will be 9)
 	cvars.sv_rangeRankAdaptivePresets = 3
 	
-	-- Множитель награды для случая, когда игрок покидал предыдущие игры. (тип: дробное число; диапазон: 0.0f..1.0f)
-	-- коэффициент награды. По умолчанию 1(нет штрафа).
+	-- Reward multiplier for the case when the player left previous games. (type: fractional number; range: 0.0f..1.0f)
+	-- reward coefficient. Default is 1 (no penalty).
 	cvars.sv_leaveFineRewardCoef = 0.8
-  	-- Максимальное снижение счётчика выходов из боя. (тип: целое число; диапазон: 0..INT_MAX)
-  	-- максимальное значение, на которое может уменьшиться счетчик ливов, когда игрок получает штраф(счетчик ливов больше единицы. По умолчанию равен 3. Целое.
+  	-- Maximum reduction in the combat exit counter. (type: integer; range: 0..INT_MAX)
+  	-- the maximum value by which the Liv counter can be reduced when a player receives a penalty (Liv counter is greater than one. Default is 3. Integer.
   	cvars.sv_leaveCounterMaxDecay = 4
-  	-- Снижение leaveCounter, если игрок не получил штраф. (тип: дробное число; диапазон: 0.0f..FLT_MAX)
-  	-- значение, на которое уменьшается счетчик, когда игрок не получает штраф(счетчик меньше единицы). По умолчанию 0.1 .
+  	-- Reduce leaveCounter if the player did not receive a penalty. (type: fractional number; range: 0.0f..FLT_MAX)
+  	-- the value by which the counter is reduced when the player does not receive a penalty (the counter is less than one). Default is 0.1.
   	cvars.sv_leaveCounterDecayWithoutFine = 0.9
-  	-- Добавляет это значение к leaveCounter, если игрок вышел из игры штатно. (тип: дробное число)
-  	-- значение, на которое увеличивается счетчик при нормальном выходе из боя(нажал на кнопку "Покинул бой"). По умолчанию 0.5.
+  	-- Adds this value to leaveCounter if the player left the game normally. (type: fractional number)
+  	-- the value by which the counter is increased when leaving the battle normally (clicked on the “Left the battle” button). Default is 0.5.
   	cvars.sv_normalLeaveCounterAdd = 0
-  	-- Добавляет это значение к leaveCounter, если игрок вышел из игры нештатно. (тип: дробное число)
-  	-- значение, на которое увеличивается счетчик при ненормальном выходе(упал клиент, пропала сеть). По умолчанию 0.
+  	-- Adds this value to leaveCounter if the player left the game abnormally. (type: fractional number)
+  	-- the value by which the counter is increased in the event of an abnormal output (the client has fallen, the network has disappeared). Default is 0.
   	cvars.sv_abnormalLeaveCounterAdd = 0
   
-  	-- Добавляет это значение к leaverReputation, если игрок получил leaver-ban. (тип: дробное число; диапазон: 0.0f..100.0f)
-  	-- [0, 100], по умолчанию 1. Это значение добавляется к leaverReputation, когда игрок получает бан.
+  	-- Adds this value to leaverReputation if the player has been leftr-banned. (type: fractional number; range: 0.0f..100.0f)
+  	-- [0, 100], default 1. This value is added to leaverReputation when a player gets banned.
   	cvars.sv_leaverReputationAdd = 1
-	-- Минимальное время battle-ban при штрафе за выход, в секундах. (тип: дробное число; диапазон: 0.0f..1800.0f)
-	-- [0, 1800], по умолчанию 300. Время, на которое игрок получает бан на вход в бой, в секундах.
+	-- Minimum battle-ban time with a penalty for leaving, in seconds. (type: fractional number; range: 0.0f..1800.0f)
+	-- [0, 1800], default 300. Time for which a player is banned from entering battle, in seconds.
 	cvars.sv_leaverBanTime = 0
-	-- Снижение leaverReputation, если игрок не покидает игру. (тип: дробное число; диапазон: 0.0f..FLT_MAX)
-	-- по умолчанию 0.01. На эту величину уменьшается leaverReputation, когда игрок не ливает.
+	-- Reduced leaverReputation if the player does not leave the game. (type: fractional number; range: 0.0f..FLT_MAX)
+	-- default 0.01. leaverReputation is reduced by this amount when the player does not pour.
 	cvars.sv_leaverReputationDecay = 0.9
 end
 
 --
 function ConfigureDediServerFlags( queueFlags )
 
-	-- SC-112454 сид-чипы
+	-- SC-112454 seed chips
 	cvars.sv_autogenModulesEnabled 		= 1
-	-- Где показывать сид-чипы: 1 - только в игре, 2 - в игре и в ангаре.
-	-- 1 — в игре, 2 — в игре и в ангаре. (тип: целое число)
+	-- Where to show seed chips: 1 - only in the game, 2 - in the game and in the hangar.
+	-- 1 - in the game, 2 - in the game and in the hangar. (type: integer)
 	cvars.sv_dbgAutogenDefs 			= 2
 
 
 	if queueFlags.newbie ~= nil and queueFlags.newbie then
-		-- Переопределяет игровую настройку штрафа времени возрождения за смерть. (тип: дробное число)
+		-- Overrides the game's respawn time penalty for death setting. (type: fractional number)
 		cvars.sv_respawnTimePenalty = 0
 	end
 
 	if queueFlags.rank ~= nil then
-		-- Боевой ранг матча; передаётся в параметры боя и влияет на ранговые ограничения.
+		-- Match combat rank; is transferred to the battle parameters and affects ranking restrictions.
 		cvars.sv_mmBattleRank = queueFlags.rank
 	end
 end
@@ -1416,128 +1416,128 @@ end
 function ConfigureZoneInstance()
 	-- restart cloud after changing these cvars
 
-	-- Ограничивает FPS этим значением; 0 — ограничение выключено. (тип: дробное число)
+	-- Limits FPS to this value; 0—restriction disabled. (type: fractional number)
 	cvars.cl_maxFps = 18
 	
-	-- Включает AI-логику кораблей. (тип: логический)
+	-- Enables AI logic for ships. (type: boolean)
 	cvars.ship_aiThink					= 1
-	-- Логирование combat-событий в файл лога; каждый уровень включает все предыдущие.
-	-- 0 - отключено; 1 - убийства/смерти/награды; 2 - +использование модулей, ракет и аур.
-	-- 3 - +весь урон; 4 - +коэффициенты параметров геймплейных аур.
+	-- Logging combat events to a log file; each level includes all previous ones.
+	-- 0 - disabled; 1 - kills/deaths/rewards; 2 - +use of modules, missiles and auras.
+	-- 3 - +all damage; 4 - +coefficients of gameplay aura parameters.
 	cvars.cl_combatLog					= 0
-	-- Коэффициент урона оружия. (тип: дробное число; диапазон: 0.0f..FLT_MAX)
+	-- Weapon damage coefficient. (type: fractional number; range: 0.0f..FLT_MAX)
 	cvars.sv_shipWeaponDamageCoef		 = 1
 
-	-- Минимальное время respawn event-объекта. (тип: дробное число)
+	-- Minimum time to respawn an event object. (type: fractional number)
 	cvars.sv_eventObjectRespawnTimeMin = 60
-	-- Максимальное время respawn event-объекта. (тип: дробное число)
-	-- задают диапазон для выбора случайно задержки первого и последующих созданий объекта.
+	-- Maximum respawn time of an event object. (type: fractional number)
+	-- set a range for randomly selecting the delay for the first and subsequent creations of an object.
 	cvars.sv_eventObjectRespawnTimeMax = 420
-	-- Время отключения event-объекта. (тип: строка)
-	-- время, после которого ивентовый объект больше не создается.
+	-- Event object shutdown time. (type: string)
+	-- the time after which the event object is no longer created.
 	cvars.sv_eventObjectEndTime = "2026-04-10T05:00:00Z"
 
-  	-- Включает событие Claws. (тип: логический)
+  	-- Enables the Claws event. (type: boolean)
 		-- April 1
   	cvars.event_claws 					= 0
 
-	-- Коэффициент конвертации подобранного loot в ресурс клана. (тип: дробное число)
-	-- 0.1 курс перевода числа подъемов лута в корпоративный иридиум
+	-- Conversion rate of selected loot into clan resource. (type: fractional number)
+	-- 0.1 rate of conversion of the number of loot lifts to corporate iridium
 	cvars.sv_pickedLootRateToClanResource = 0.1
-	-- Время обновления подобранного loot. (тип: дробное число)
-	-- интервал отправки иридиума в корпу в секундах.
+	-- Time to update the selected loot. (type: fractional number)
+	-- interval of sending iridium to the corpus in seconds.
 	cvars.sv_pickedLootUpdateTime 		= 6 * 3600
 
-	-- Отключает проверку формата Lua-данных при конвертации и сохранении в базу. 1 - данные записываются без сверки со схемой; только для не-live сборок.
+	-- Disables Lua data format checking when converting and saving to the database. 1 - data is recorded without checking the diagram; only for non-live builds.
 	--cvars.dbg_disableLuaDataFormatChecking = 1
 	
-	-- Таймер портала к станции в открытом космосе.
+	-- Portal timer to a station in outer space.
 	cvars.sv_spaceStationPortalTimer = 3
 	
-	-- SC-112454 сид-чипы
+	-- SC-112454 seed chips
 	cvars.sv_autogenModulesEnabled 		= 1
-	-- Где показывать сид-чипы: 1 - только в игре, 2 - в игре и в ангаре.
-	-- 1 — в игре, 2 — в игре и в ангаре. (тип: целое число)
+	-- Where to show seed chips: 1 - only in the game, 2 - in the game and in the hangar.
+	-- 1 - in the game, 2 - in the game and in the hangar. (type: integer)
 	cvars.sv_dbgAutogenDefs 			= 2
 	
-	-- Должен ли экземпляр зоны обмениваться данными с сервером скриптов. (тип: логический)
+	-- Whether the zone instance should communicate with the script server. (type: boolean)
 	cvars.sv_enableCommunticationWithSS = 1
 
-	-- Интервалы разницы рангов для масштабирования урона, список через запятую. (тип: строка)
-	-- сколько Rplayer - Rmob
+	-- Rank difference intervals for damage scaling, comma separated list. (type: string)
+	-- how much Rplayer - Rmob
 	cvars.sv_ranksDiff 		= "-5, -2, 0, 2, 5, 10"
-	-- Коэффициенты масштабирования урона в OW по разнице рангов, список через запятую. (тип: строка)
-	-- цифры "в диапозонах" предыдущей таблицы
+	-- Damage scaling factors in OW by rank difference, list separated by commas. (type: string)
+	-- figures "in ranges" of the previous table
 	cvars.sv_ranksDiffCoeff = "-0.5, 0.2, 0.5, 0.6, 0.7, 0.8, 1"
 
-	-- Показывать ли параметры масштабирования. (тип: логический)
+	-- Whether to show scaling options. (type: boolean)
 	cvars.dbg_logRankDiffScaling = 0
 
-	-- Логировать информацию squad: 1 — spawn, 2 — движение, 3 — бой, 5 — всё. (тип: целое число)
+	-- Log squad information: 1 - spawn, 2 - movement, 3 - battle, 5 - everything. (type: integer)
 	cvars.ai_logSquads 					= 5
 	
-	-- Расстояние между игроком и точкой despawn. (тип: дробное число)
+	-- Distance between the player and the despawn point. (type: fractional number)
 	cvars.ai_convoyDefendRadius 		= 300
-	-- Время сканирования loot crate в открытом космосе.
+	-- Loot crate scanning time in outer space.
 	cvars.sv_lootCrateScanTime 			= 1
-	-- Максимальная дистанция, на которую AI-отряд может отходить от точки старта при преследовании врага. (тип: дробное число)
+	-- The maximum distance an AI squad can move away from the starting point when pursuing an enemy. (type: fractional number)
 	cvars.ai_kiteDistance 				= 5000
 
-  	-- Множитель опыта за первую PvE-победу дня. (тип: дробное число)
+  	-- Experience multiplier for the first PvE victory of the day. (type: fractional number)
 	-- x3 FIRST WIN
   	cvars.sv_dailyWinPveExpRewardCf	 	= x3fw
-	-- Множитель опыта за первую PvP-победу дня. (тип: дробное число)
+	-- Experience multiplier for the first PvP victory of the day. (type: fractional number)
 	cvars.sv_dailyWinPvpExpRewardCf		= x3fw
-  	-- Множитель опыта за первую coop-победу дня. (тип: дробное число)
+  	-- Experience multiplier for the first co-op victory of the day. (type: fractional number)
   	cvars.sv_dailyWinCoopExpRewardCf	= x3fw
-    -- Множитель опыта за первую brawl-победу дня. (тип: дробное число)
+    -- Experience multiplier for the first brawl victory of the day. (type: fractional number)
     cvars.sv_dailyWinBrawlExpRewardCf 	= x3fw
 
-	-- Игрок получает статус агрессора после такого объёма урона по неигровой цели. (тип: дробное число)
+	-- The player receives the aggressor status after this amount of damage to a non-player target. (type: fractional number)
 	cvars.sv_aggressorMinNPCDamage		= 3000
-	-- Максимальное значение таймера флага агрессора. (тип: дробное число)
+	-- The maximum value of the aggressor flag timer. (type: fractional number)
 	cvars.sv_aggressorTimer				= 30
 
-	-- Цена воскрешения игрока в credits.
+	-- The cost of resurrecting a player in credits.
 	cvars.sv_resurrectionCreditsPrice   = 100000
 
-	-- Через это время экземпляр зоны будет закрыт, если в нём нет клиентов, в секундах. (тип: дробное число)
+	-- After this time, the zone instance will be closed if there are no clients in it, in seconds. (type: fractional number)
 	cvars.sv_instanceLifeTime			= 720
 	
-	-- Коэффициент награды свободной синергии. (тип: дробное число)
+	-- Free synergy reward coefficient. (type: fractional number)
  	-- OW synergy
 	cvars.sv_freeSynergyRewardCf					= 0.05
-	-- Коэффициент награды свободной синергии для premium-корабля. (тип: дробное число)
+	-- Free synergy reward coefficient for a premium ship. (type: fractional number)
 	cvars.sv_freeSynergyRewardCfPremiumVessel		= 0.20
 
-	-- Замена mastery корабля для free space, список по рангам через запятую. (тип: строка)
+	-- Replacement of mastery ship for free space, list by rank separated by commas. (type: string)
 	cvars.sv_freeSpaceExpMastery	= "1.95,1.95,1.95,1.95,1.95,1.95,1.95,2.35,2.575,3.04,3.4,3.64,3.915,4.045,4.1,4.1,4.1,4.1"
-    -- Множитель выдаваемого опыта по рангам, список через запятую. (тип: строка)
+    -- Multiplier of experience given by rank, comma separated list. (type: string)
     cvars.sv_expRate				= "1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1"
-  	-- Разрешает выдачу опыта кораблю за боевые действия в открытом космосе (Free Space).
-  	-- 0 - никому, 1 - только premium-игрокам, 2 - всем игрокам. Дополнительно опыт ограничен рангом зоны и sv_freeSpaceExpCap. (тип: целое число)
+  	-- Allows the issuance of experience to a ship for combat operations in Free Space.
+  	-- 0 - for no one, 1 - only for premium players, 2 - for all players. Additionally, experience is limited by zone rank and sv_freeSpaceExpCap. (type: integer)
   	cvars.sv_freeSpaceExpRewards		= 2
 
-  	-- Выдавать опыт за урон во Free Space. (тип: логический)
+  	-- Give out experience for damage in Free Space. (type: boolean)
 	-- Fast Synergy Gain
   	cvars.sv_expForDamageFreeSpace = 0
 
-	-- Def-имя loot crate, который используется системой случайного лута в Free Space.
-	-- Указанный def должен быть сущностью типа LootCrate и иметь признак isRare; иначе случайный лут в зоне отключится с ошибкой в логах. (тип: строка)
+	-- Def-name of loot crate, which is used by the random loot system in Free Space.
+	-- The specified def must be an entity of type LootCrate and have the isRare attribute; otherwise random loot in the zone will be disabled with an error in the logs. (type: string)
 	cvars.sv_randomLootDef 				= "LootCrate_Craft_paradise_Weapon20"
 
-	-- Время в секундах, через которое игрок кикается за AFK, если он не присылал управляющие ввод или они не менялись.
-	-- Большое значение (напр. 3600) фактически отключает AFK-кик. (тип: дробное число)
+	-- Time in seconds after which a player kicks for AFK if he did not send control inputs or they did not change.
+	-- A high value (eg 3600) actually disables AFK kick. (type: fractional number)
 	cvars.sv_afkCheckDuration			= 3600
 
-	-- Включает событие «Invasion with beacons». (тип: логический)
+	-- Enables the "Invasion with beacons" event. (type: boolean)
 	-- #57052
 	cvars.event_invasionWithBeacons	 	= 0
 
-	-- Шансы выдачи label-меток кораблям по рангам; строка содержит 18 значений.
+	-- Chances of issuing labels to ships by rank; the line contains 18 values.
 	cvars.sv_owLabelChances				= "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
 
-	-- Особый режим поворота UFO-корабля по оси X.
+	-- A special mode for rotating the UFO ship along the X axis.
 	-- UFO ship controls
 	cvars.ship_ufoRotateX = 1
 	
@@ -1583,58 +1583,58 @@ function ConfigureZoneInstance()
     [ 'mininghub_jer_rock_frontier_e_ow' ] = { [ 1 ] = { lootCrate = "LootCrate_Loot_460_ranks_15_17", dropCounter = 1}, },
     })
 
-  	-- Коэффициент урона по дружественным фракционным сущностям. (тип: дробное число; диапазон: 0.0f..1.0f)
-	 ---SC-113076 пиратский евент
-  	-- коэффициент урона дружественным фракциям в ОМ, данный параметр влияет на урон, остальные только на отношение
+  	-- Damage coefficient against friendly faction entities. (type: fractional number; range: 0.0f..1.0f)
+	 ---SC-113076 pirate event
+  	-- coefficient of damage to friendly factions in MP, this parameter affects damage, the rest only affect the ratio
   	cvars.sv_frendlyFactionDamageCoef			= 0.25
 	
-	-- Игрок становится врагом фракции после такого объёма урона по неигровой фракционной цели. (тип: дробное число)
-	-- значение счётчика урона, после которого фракция становится врагом игроку
+	-- The player becomes an enemy of the faction after this amount of damage to a non-player faction target. (type: fractional number)
+	-- the value of the damage counter, after which the faction becomes an enemy to the player
 	cvars.sv_enemyMinFactionNPCDamage			= 6
-	-- Время, на которое у игрока портятся отношения с фракцией после урона по её NPC.
-	-- время в секундах, в течение которого фракция будет врагом игроку
+	-- The time for which a player’s relationship with a faction deteriorates after damage to its NPC.
+	-- time in seconds during which the faction will be an enemy to the player
 	cvars.sv_factionBadRelationshipTime			= 45
 	
-	-- Максимальная сумма урона для группы отношений с фракцией; не влияет на фактический урон по сущностям. (тип: дробное число)
-	-- максимальное значение счётчика урона от игрока
+	-- Maximum amount of damage for a faction relationship group; does not affect actual damage to entities. (type: fractional number)
+	-- maximum player damage counter value
 	cvars.sv_enemyMaxFactionNPCDamage			= 100
-	-- Максимальный урон в секунду для группы отношений с фракцией; не влияет на фактический урон по сущностям. (тип: дробное число)
-	-- ограничение счётчика урона, накапливаемого за одну секунду
+	-- Maximum damage per second for a faction relationship group; does not affect actual damage to entities. (type: fractional number)
+	-- limiting the damage counter accumulated per second
 	cvars.sv_enemyMaxFactionNPCDamagePerSec		= 1
-	-- Скорость снижения накопленного урона по фракционным NPC для расчёта враждебности.
-	-- уменьшение счётчика урона за секунду
+	-- The rate of reduction of accumulated damage for faction NPCs for calculating hostility.
+	-- decrease damage counter per second
 	cvars.sv_factionNPCDamageDecay				= 0.2
 
-	-- Путь для сохранения replay dedicated-сервера. (тип: строка)
+	-- Path to save the replay dedicated server. (type: string)
 	cvars.sv_autorecordReplaysTo = ""
 end
 
 
 --
 function ConfigureGRD()
-	-- Если задано, добавляет bonus gold победителям боя. (тип: целое число)
+	-- If set, adds bonus gold to the winners of the battle. (type: integer)
 	cvars.reward_bonusGoldForWinner		= 0
-	-- Если задано, добавляет bonus gold проигравшим боя. (тип: целое число)
+	-- If set, adds bonus gold to the losers of the battle. (type: integer)
 	cvars.reward_bonusGoldForLooser		= 0
 
-	-- Период события «gold за первую и пятую победу» в формате 2013-04-12T12:00:00Z;2013-04-13T12:00:00Z. (тип: строка)
+	-- The event period is “gold for the first and fifth win” in the format 2013-04-12T12:00:00Z;2013-04-13T12:00:00Z. (type: string)
 	-- event 'gold for first and fifth win'
 	cvars.reward_eventGoldTimePeriod = "2025-09-02T12:00:00Z;2025-09-11T06:00:00Z"
-	-- Размер награды события «gold за первую и пятую победу» в формате 500;0;0;0;5000. (тип: строка)
+	-- The size of the event reward “gold for the first and fifth win” in the format is 500;0;0;0;5000. (type: string)
 	cvars.reward_eventGoldTimeValue	= "0;0;0;0;50;0;0;0;0;100;0;0;0;0;150;0;0;0;0;200"
 
-	-- Включает планировщик. (тип: целое число)
+	-- Includes scheduler. (type: integer)
 	cvars.cron_enabled					= 1
 
-	-- Время начала события с кредитами. (тип: строка)
+	-- Start time of the event with credits. (type: string)
 	cvars.store_creditsEventStart		= creditsEventStart
-	-- Время окончания события с кредитами. (тип: строка)
+	-- End time of the event with credits. (type: string)
 	cvars.store_creditsEventEnd			= creditsEventEnd
   
-	-- Дневной лимит token credits, которые игрок может заработать за день.
+	-- Daily limit of token credits that a player can earn per day.
 	cvars.sv_tokenCreditsDailyLimit = 1000
   
-	-- Максимальное значение leaveCounter. (тип: дробное число; диапазон: 0.0f..FLT_MAX)
+	-- Maximum value of leaveCounter. (type: fractional number; range: 0.0f..FLT_MAX)
     -- SC-113769
 	cvars.reward_leaveCounterMax = 12
 end
@@ -1642,20 +1642,20 @@ end
 
 --
 function ConfigureLoadBalancer()
-	-- Включение запрещает доступ к серверу. (тип: целое число)
+	-- Enabling it denies access to the server. (type: integer)
 	cvars.lb_disallowAccess				= 0
 
-	-- Максимальное количество игроков на каждый shard. (тип: целое число)
+	-- Maximum number of players per shard. (type: integer)
 	cvars.lb_limitPlayersOnShardTo		= 800
 
-	-- Среднее время постановки в очередь не опускается ниже этого значения. (тип: дробное число)
+	-- The average queuing time does not fall below this value. (type: fractional number)
 	cvars.lb_avgTimeMinClamp			= 10
-	-- При расчёте среднего времени учитывается столько последних игроков в очереди. (тип: целое число)
+	-- When calculating the average time, the number of last players in the queue is taken into account. (type: integer)
 	cvars.lb_avgTimeAveragingCf			= 10
 
-	-- Параметр балансировщика нагрузки: ограничивает задержки и длину очерей на shard.
+	-- Load Balancer Option: Limits latency and queue length on shard.
 	cvars.lb_minNextPlayerDelay			= 0.05
-	-- Параметр балансировщика нагрузки: ограничивает задержки и длину очерей на shard.
+	-- Load Balancer Option: Limits latency and queue length on shard.
 	cvars.lb_maxTaskQLenOnShard			= 500
   
     -- x3 FIRST WIN
@@ -1668,54 +1668,54 @@ end
 
 --
 function ConfigureChatServer()
-	-- Длительность бана нарушителя. (тип: целое число)
+	-- Duration of the offender's ban. (type: integer)
 	cvars.antispam_autobanSec					= 60
 
-	-- Порог показателя awareness, при превышении которого игрок автоматически банится в чате.
-	-- Awareness - накопительный показатель уровня спама: растёт, если игрок пишет часто и повторяется, и постепенно снижается со временем при перерывах. (тип: целое число)
+	-- Awareness threshold, when exceeded, the player is automatically banned from the chat.
+	-- Awareness is a cumulative indicator of the level of spam: it increases if the player writes often and repeats, and gradually decreases over time during breaks. (type: integer)
 	cvars.antispam_autobanAwareness				= 500
 
-	-- Порог awareness для уведомления пользователя о прекращении спама. (тип: целое число)
+	-- Awareness threshold for notifying the user that spam has stopped. (type: integer)
 	cvars.antispam_notifyAwareness				= 450
 
-	-- Включает отправку расширенного уведомления. (тип: целое число)
+	-- Enables sending of extended notification. (type: integer)
 	cvars.antispam_notifyExtended				= 0
 
-	-- Уменьшается на это значение в секунду. (тип: дробное число)
+	-- Decreases by this value per second. (type: fractional number)
 	cvars.antispam_awarenessDecay				= 10
 
-	-- Числитель A в формуле прироста awareness по частоте сообщений: прирост = A / dt.
-	-- dt - время в секундах с прошлого сообщения (минимум 0.5 сек); большее A - быстрее растёт awareness при частых сообщениях. (тип: дробное число)
+	-- Numerator A in the formula for awareness growth by message frequency: growth = A / dt.
+	-- dt - time in seconds since the last message (minimum 0.5 sec); A larger A means awareness grows faster with frequent messages. (type: fractional number)
 	cvars.antispam_awarenessIntervalNumerator	= 40
 
-	-- Коэффициент K в формуле прироста awareness по похожести сообщений: прирост = K * similarity ^ P. (тип: дробное число)
-	-- Прирост начисляется при каждом новом сообщении.
-	-- similarity - доля текста текущего сообщения, совпадающая с предыдущими: сумма длин совпадающих подстрок
-	-- (длиннее 2 символов) из предыдущих сообщений, делённая на длину текущего сообщения.
+	-- Coefficient K in the formula for increasing awareness by message similarity: increase = K * similarity ^ P. (type: fractional number)
+	-- The increase is accrued with each new message.
+	-- similarity - the proportion of the text of the current message that matches the previous ones: the sum of the lengths of matching substrings
+	-- (longer than 2 characters) from previous messages, divided by the length of the current message.
 	cvars.antispam_awarenessSimilarityMul		= 1
-	-- Степень P в формуле прироста awareness по похожести сообщений: прирост = K * similarity ^ P. (тип: дробное число)
+	-- Degree P in the formula for increasing awareness by message similarity: increase = K * similarity ^ P. (type: fractional number)
 	cvars.antispam_awarenessSimilarityPow		= 1
 
-    -- Длительность бана нарушителя. (тип: целое число)
+    -- Duration of the offender's ban. (type: integer)
 	-- Trade Chat
     cvars.antispam_trade_autobanSec	= 60
-    -- Awareness - накопительный показатель уровня спама: растёт, если игрок пишет часто и повторяется, и постепенно снижается со временем при перерывах.
-    -- Тот же порог автобана, но для trade-канала. (тип: целое число)
+    -- Awareness is a cumulative indicator of the level of spam: it increases if the player writes often and repeats, and gradually decreases over time during breaks.
+    -- The same autobahn threshold, but for the trade channel. (type: integer)
     cvars.antispam_trade_autobanAwareness	= 200
-    -- Порог awareness для уведомления пользователя о прекращении спама. (тип: целое число)
+    -- Awareness threshold for notifying the user that spam has stopped. (type: integer)
     cvars.antispam_trade_notifyAwareness	= 150
-    -- Включает отправку расширенного уведомления. (тип: целое число)
+    -- Enables sending of extended notification. (type: integer)
     cvars.antispam_trade_notifyExtended	= 0
-    -- Уменьшается на это значение в секунду. (тип: дробное число)
+    -- Decreases by this value per second. (type: fractional number)
     cvars.antispam_trade_awarenessDecay	= 10
-    -- Числитель A в формуле прироста awareness: прирост = A / dt (dt в секундах, мин 0.5).
-    -- Большее A - быстрее растёт awareness при частых сообщениях; тот же параметр, что и antispam_awarenessIntervalNumerator. (тип: дробное число)
+    -- Numerator A in the awareness gain formula: gain = A / dt (dt in seconds, min 0.5).
+    -- Larger A - awareness grows faster with frequent messages; same parameter as antispam_awarenessIntervalNumerator. (type: fractional number)
     cvars.antispam_trade_awarenessIntervalNumerator	= 100
-    -- Коэффициент K в формуле прироста awareness по похожести сообщений: прирост = K * similarity ^ P.
-    -- Тот же параметр, что и antispam_awarenessSimilarityMul, но для trade chat. (тип: дробное число)
+    -- Coefficient K in the formula for increasing awareness by message similarity: increase = K * similarity ^ P.
+    -- The same parameter as antispam_awarenessSimilarityMul, but for trade chat. (type: fractional number)
     cvars.antispam_trade_awarenessSimilarityMul	= 1
-    -- Степень P в формуле прироста awareness по похожести сообщений: прирост = K * similarity ^ P.
-    -- Тот же параметр, что и antispam_awarenessSimilarityPow, но для trade chat. (тип: дробное число)
+    -- Degree P in the formula for increasing awareness by message similarity: increase = K * similarity ^ P.
+    -- The same parameter as antispam_awarenessSimilarityPow, but for trade chat. (type: fractional number)
     cvars.antispam_trade_awarenessSimilarityPow	= 1
 end
 
@@ -1723,58 +1723,58 @@ end
 --
 function ConfigureUniverse()
 
-	-- Идентификатор используемой Universe. (тип: целое число; диапазон: 1..65535)
+	-- ID of the Universe being used. (type: integer; range: 1..65535)
 	cvars.universe_unid = 2
-  	-- Время начала новогоднего события. (тип: строка)
+  	-- Start time of the New Year's event. (type: string)
   	-- NY2016 params
   	cvars.universe_newYearStartTime	= "2018-12-17T00:00:00Z"
-  	-- Скорость роста счётчика убийств Empire. (тип: дробное число)
+  	-- Empire kill counter growth rate. (type: fractional number)
   	cvars.universe_empireKillsCF		= 0
-  	-- Скорость роста счётчика убийств Federation. (тип: дробное число)
+  	-- Federation kill counter growth rate. (type: fractional number)
   	cvars.universe_federationKillsCF	= 0
-  	-- Скорость роста счётчика убийств Jericho. (тип: дробное число)
+  	-- Jericho's kill counter growth rate. (type: fractional number)
   	cvars.universe_jerichoKillsCF		= 0
-	-- Доля награды зоны, которая достаётся текущему владельцу; оставшаяся доля распределяется между соперниками. (тип: дробное число 0..1)
+	-- The share of the zone reward that goes to the current owner; the remaining share is distributed among rivals. (type: fractional number 0..1)
 	cvars.universe_factorOwnerInReward = 0.4
-  	-- Доля накопленного влияния владельца зоны, которая списывается в начале конфликта. (тип: дробное число 0..1)
+  	-- The share of accumulated influence of the zone owner, which is written off at the beginning of the conflict. (type: fractional number 0..1)
   	cvars.universe_decayOwner = 0.25
-	-- Доля накопленного влияния соперников, которая списывается в начале конфликта. (тип: дробное число 0..1)
+	-- The share of the accumulated influence of rivals that is written off at the beginning of the conflict. (type: fractional number 0..1)
 	cvars.universe_decayRival = 0.1
-	-- Коэффициент A в формуле штрафа владельца по итогам конфликта: вклад соперника = влияние / (A * место + B), место считается с 0. (тип: дробное число)
+	-- Coefficient A in the owner's penalty formula following a conflict: opponent's contribution = influence / (A * place + B), place is counted from 0. (type: fractional number)
 	-- 1/3, 1/5, 1/7...
 	cvars.universe_takeOwnerCoeffA = 2
-	-- Коэффициент B в формуле штрафа владельца по итогам конфликта: вклад соперника = влияние / (A * место + B), место считается с 0. (тип: дробное число)
+	-- Coefficient B in the owner's penalty formula following a conflict: opponent's contribution = influence / (A * place + B), place is counted from 0. (type: fractional number)
 	cvars.universe_takeOwnerCoeffB = 3
-	-- Доля накопленного влияния, которая списывается после конфликта без нового влияния за время конфликта. (тип: дробное число 0..1)
+	-- The share of accumulated influence that is written off after a conflict without new influence during the conflict. (type: fractional number 0..1)
 	-- SC-111290
 	cvars.universe_decayIdle  = 0.5
 
-	-- Параметры глобальной войны: настраивают формулы начисления военного опыта и урона корпорации.
-	-- Базовая формула события: raw = множитель_убийства * множитель_цели; затем raw переводится в опыт и урон отдельными коэффициентами.
-  	-- Множитель для участников, которые помогли убить цель, но не нанесли финальный удар. Финальный убийца получает множитель 1. (тип: дробное число 0..1)
+	-- Global war parameters: adjust the formulas for calculating military experience and damage to a corporation.
+	-- Basic event formula: raw = kill_multiplier * target_multiplier; raw is then converted into experience and damage using separate coefficients.
+  	-- Multiplier for participants who helped kill the target but did not deliver the final blow. The final killer receives a multiplier of 1. (type: fractional number 0..1)
 	cvars.war_coeffAssist				 = 0.2
-	-- Коэффициент A для цели-врага в формуле множителя цели: множитель = A * ранг_жертвы + B. (тип: дробное число)
+	-- The A coefficient for the enemy target in the target multiplier formula is: multiplier = A * target_rank + B. (type: fractional number)
 	cvars.war_coeffRivalA				 = 1
-	-- Коэффициент B для цели-врага в формуле множителя цели: множитель = A * ранг_жертвы + B. (тип: дробное число)
+	-- The B coefficient for the enemy target in the target multiplier formula is: multiplier = A * target_rank + B. (type: fractional number)
 	cvars.war_coeffRivalB				 = 2
-	-- Множитель цели, если жертва не состоит в войне с корпорацией атакующего. (тип: дробное число)
+	-- Target multiplier if the victim is not at war with the attacker's corporation. (type: fractional number)
 	cvars.war_coeffNeutral				 = 0.1
-	-- Множитель цели для bot-заменителя вместо реального игрока. (тип: дробное число)
+	-- Target multiplier for bot substitute instead of real player. (type: fractional number)
 	cvars.war_coeffBot					 = 0.05
-	-- Коэффициент пересчёта raw-очков события в прогресс военного звания игрока. (тип: дробное число)
+	-- The coefficient for converting raw event points into the player’s military rank progress. (type: fractional number)
 	cvars.war_damageRawRateToMilitaryExp = 10
-	-- Коэффициент пересчёта raw-очков события в урон корпорации на глобальной карте. (тип: дробное число)
+	-- The coefficient for converting raw event points into corporation damage on the global map. (type: fractional number)
 	cvars.war_damageRawRateToDamage		 = 100
-  	-- Доля периодического уменьшения базовой стоимости войны; применяется как множитель 1 - значение. (тип: дробное число 0..1)
+  	-- Share of periodic reduction in the base cost of war; applied as a multiplier of 1 - value. (type: fractional number 0..1)
   	cvars.war_decayCostBase				 = 0.1
 	
-	-- Разрешает внешнему сервису управлять логикой зон: при отключённой логике зоны сервер сам не запускает/завершает конфликты и не принимает вклад. (тип: булево значение)
+	-- Allows an external service to manage zone logic: when zone logic is disabled, the server itself does not start/end conflicts and does not accept contributions. (type: boolean)
 	-- SC-112644
 	cvars.universe_allowExternalControl  = 1
 
-	-- Доля бонуса к влиянию клана в зоне, если раса клана совпадает с доминирующей расой звёздной системы; множитель = 1 + значение. (тип: дробное число 0..1)
+	-- A share of the bonus to the clan’s influence in the zone if the clan’s race coincides with the dominant race of the star system; multiplier = 1 + value. (type: fractional number 0..1)
 	cvars.universe_raceFactorStellar	= 0.1
-	-- Доля бонуса к влиянию клана в зоне, если раса клана совпадает с расой самой зоны; множитель = 1 + значение. (тип: дробное число 0..1)
+	-- A share of the bonus to the influence of a clan in a zone if the clan’s race matches the race of the zone itself; multiplier = 1 + value. (type: fractional number 0..1)
 	cvars.universe_raceFactorZone		= 0.1
 
 end
@@ -1783,36 +1783,36 @@ end
 --
 function ConfigureQuestServer()
 
-	-- Включает/выключает квесты. (тип: логический)
+	-- Enables/disables quests. (type: boolean)
 	cvars.quests_enable				= 1
-  	-- Время начала новогоднего события. (тип: строка)
+  	-- Start time of the New Year's event. (type: string)
   	cvars.event_newYear				= "2030-12-17T00:00:00Z"
-  	-- Максимальное число UID для загрузки в операции чтения БД. (тип: целое число; диапазон: 1..1024)
+  	-- The maximum number of UIDs to load in a database read operation. (type: integer; range: 1..1024)
   	cvars.quests_readWaveMaxUids 	= 100
-    -- Битовая маска логирования debug-сообщений квестов: сложением значений включаются нужные категории.
-    -- 1 - кэширование; 2 - доступность квестов; 4 - состояние пользователя; 8 - выбор квестов; 16 - прогресс квестов. 31 - все категории. (тип: целое число)
+    -- Bit mask for logging debug messages of quests: by adding the values, the necessary categories are included.
+    -- 1 - caching; 2 - availability of quests; 4 - user state; 8 - selection of quests; 16 - quest progress. 31 - all categories. (type: integer)
     cvars.quests_dbgLog				= 31
-  	-- Включает летнее событие. (тип: целое число)
+  	-- Includes summer event. (type: integer)
   	cvars.event_summer 				= 0
-  	-- Включает летнее событие с кораблём. (тип: целое число)
+  	-- Includes a summer ship event. (type: integer)
   	cvars.event_summerShip 			= 0
-  	-- Включает событие Halloween. (тип: целое число)
+  	-- Includes the Halloween event. (type: integer)
   	cvars.event_halloween	 		= 0
 
-  	-- Время начала кастомного события. (тип: строка)
-  	-- Необходимо изменять время начала и конца кратно часу, иначе квест imaginary может вести себя непредсказуемо.
+  	-- Start time of the custom event. (type: string)
+  	-- It is necessary to change the start and end times in multiples of an hour, otherwise the imaginary quest may behave unpredictably.
   	cvars.event_custom 					= event_custom
 
-	-- Коэффициенты формулы убывающего вознаграждения за imaginary-квесты:
-	-- количество = floor((A - 1) * (1 - tanh(B * (прохождений - 1))) + 1), где «прохождения» - сколько раз игрок уже выполнил этот квест.
-  	-- Коэффициент A: начальная величина награды при первом прохождении; с ростом числа прохождений награда убывает до 1. (SC-109926; тип: дробное число)
+	-- Coefficients of the decreasing reward formula for imaginary quests:
+	-- quantity = floor((A - 1) * (1 - tanh(B * (walkthroughs - 1))) + 1), where “walkthroughs” is the number of times the player has already completed this quest.
+  	-- Coefficient A: the initial value of the reward on the first playthrough; as the number of completions increases, the reward decreases to 1. (SC-109926; type: fractional number)
 	cvars.quests_imaginaryRewardCoeffA = 25
-	-- Коэффициент B: скорость убывания награды с ростом числа прохождений; большее B - быстрее падает награда. (SC-109926; тип: дробное число)
+	-- Coefficient B: the rate at which the reward decreases as the number of completions increases; larger B - the reward falls faster. (SC-109926; type: fractional)
 	cvars.quests_imaginaryRewardCoeffB = 0.17
 
-  	-- Время начала события с кредитами. (тип: строка)
+  	-- Start time of the event with credits. (type: string)
   	cvars.store_creditsEventStart 	= creditsEventStart
-	-- Время окончания события с кредитами. (тип: строка)
+	-- End time of the event with credits. (type: string)
 	cvars.store_creditsEventEnd 	= creditsEventEnd
 
 	_G.QuestServer_SetupBattlePassActivation( battlePassStart, battlePassEndTable )
@@ -1823,12 +1823,12 @@ end
 --
 function ConfigureAchievementServer()
 
-	-- Включает серверную обработку достижений.
+	-- Enables server-side processing of achievements.
 	cvars.achievements_enable	= 1
-  	-- Максимальное число UID для загрузки в операции чтения БД. (тип: целое число; диапазон: 1..256)
+  	-- The maximum number of UIDs to load in a database read operation. (type: integer; range: 1..256)
   	cvars.achievements_readWaveMaxUids	= 100
-	-- Уровень/флаг отладочного логирования. (тип: логический)
-	-- дополнительное логирование
+	-- Debug logging level/flag. (type: boolean)
+	-- additional logging
 	cvars.achievements_dbgLogEnable = 0
 
 end
@@ -1837,22 +1837,22 @@ end
 --
 function ConfigureLobbyServer()
 
-	-- Включает сервер пользовательских игр.
+	-- Includes a custom game server.
 	cvars.lobby_enabled			= 1
-	-- Награды за пользовательские игры умножаются на это значение. (тип: дробное число)
+	-- Rewards for custom games are multiplied by this value. (type: fractional number)
 	cvars.lobby_rewardRates		= 1
-  	-- Минимум/максимум игроков для запуска PvE-lobby.
+  	-- Minimum/maximum players to run PvE-lobby.
   	cvars.lobby_reqPlayersPvEMin = 1
-	-- Минимум/максимум игроков для запуска PvE-lobby.
+	-- Minimum/maximum players to run PvE-lobby.
 	cvars.lobby_reqPlayersPvEMax = 4
-    -- Лимит одинаковых unique-модулей на один корабль; отдельно задаётся для обычных и premium-кораблей.
+    -- Limit of identical unique modules per ship; is set separately for regular and premium ships.
     -- #85547
     cvars.store_maxUniqueModules = 3
-  	-- Лимит одинаковых unique-модулей на один корабль; отдельно задаётся для обычных и premium-кораблей.
-  	-- #0098493: Сделать возможнсть установки экспериментальных модулей на прем. и ДЛЦ корабли в кол-ве 1 шт
+  	-- Limit of identical unique modules per ship; is set separately for regular and premium ships.
+  	-- #0098493: Make it possible to install experimental modules on premium. and DLC ships in quantity 1 piece
   	cvars.store_maxUniqueModulesOnPremium = 2
 	
-	-- список запрещенного оборудования (кораблей и модулей) в лигах
+	-- list of prohibited equipment (ships and modules) in leagues
 	Lobby_SetupLeagueForbiddenEquipment( leagueForbiddenDefs )
 	
 end
@@ -1893,41 +1893,41 @@ function ConfigureLeaderboardServer()
     -- local goldCreditsForTop100	= { params = { stringId = "UWinBro", goldCredits = 1000 }, type = LRT_CREDITS, posFilter = 100 }
     -- local clanEffTopEvent = { params = { event = "clan_weekly_top", v = 1 }, type = LRT_LB_EVENT, posFilter = 10 }
 
-    -- ЛИДЕРБОРДЫ ИГРОКОВ ПЕРМАНЕНТНЫЕ
-    -- Престиж игрока
+    -- PLAYERS' LEADERBOARDS PERMANENT
+    -- Player Prestige
     table.insert( lbrds, { name = "player_prestige", entityType = LET_PLAYER } )
     table.insert( routes, { event = "prestige", target = "player_prestige", update = LUT_SET } )
-    -- Суммарная пвп эффективность игрока +
+    -- Total pvp player efficiency +
     table.insert( lbrds, { name = "player_pvp_effectiveness", entityType = LET_PLAYER, decayInterval = 60 * 24, decayPower = 0.1 } )
     table.insert( routes, { event = "pvp_eff", target = "player_pvp_effectiveness", update = LUT_INCREMENT } )
-    -- Суммарная пве эффективность игрока +
+    -- Total pve player efficiency +
     table.insert( lbrds, { name = "player_pve_effectiveness", entityType = LET_PLAYER, decayInterval = 60 * 24, decayPower = 0.1 } )
     table.insert( routes, { event = "pve_eff", target = "player_pve_effectiveness", update = LUT_INCREMENT } )
-    -- Суммарное количество вылетов
+    -- Total number of departures
     table.insert( lbrds, { name = "player_battles", entityType = LET_PLAYER } )
     table.insert( routes, { event = "gover", target = "player_battles" } )
-    -- Суммарное количество побед
+    -- Total number of wins
     table.insert( lbrds, { name = "player_wins", entityType = LET_PLAYER } )
     table.insert( routes, { event = "gwin", target = "player_wins" })
-    -- Суммарное количество убийств
+    -- Total number of kills
     table.insert( lbrds, { name = "player_kills", entityType = LET_PLAYER } )
     table.insert( routes, { event = "kills", target = "player_kills" } )
-    -- Количество положительной кармы в открытом мире
+    -- Amount of positive karma in the open world
     table.insert( lbrds, { name = "player_karma_good", entityType = LET_PLAYER } )
     table.insert( routes, { event = "karma", target = "player_karma_good", update = LUT_SET } )
-    -- Количество отрицательной кармы в открытом мире
+    -- Amount of negative karma in the open world
     table.insert( lbrds, { name = "player_karma_bad", entityType = LET_PLAYER, dir = 1 } )
     table.insert( routes, { event = "karma", target = "player_karma_bad", update = LUT_SET } )
-    -- Суммарное количество голов в футболе
+    -- Total number of goals in football
     table.insert( lbrds, { name = "player_goals", entityType = LET_PLAYER } )
     table.insert( routes, { event = "goals", target = "player_goals", update = LUT_INCREMENT } )
-    -- Суммарное количество убийство в голодных играх
+    -- Total number of kills in the hunger games
     table.insert( lbrds, { name = "player_hunger", entityType = LET_PLAYER } )
     table.insert( routes, { event = "hunger_games_kills", target = "player_hunger", update = LUT_INCREMENT } )
-    -- Суммарное количество очков влияния заработанное игроком
+    -- The total number of influence points earned by the player
     table.insert( lbrds, { name = "player_pressure", entityType = LET_PLAYER } )
     table.insert( routes, { event = "pressure", target = "player_pressure", update = LUT_INCREMENT } )
-    -- Скорость прохождения рейда (time_название_миссии)
+    -- Raid completion speed (time_mission_name)
     table.insert( lbrds, { name = "player_time_pve_raid", entityType = LET_PLAYER, dir = 1 } )
     table.insert( routes, { event = "time_pve_raid", target = "player_time_pve_raid", update = LUT_SET_IF_LESSER } )
     table.insert( lbrds, { name = "player_time_pve_raid_waterharvest_t3", entityType = LET_PLAYER, dir = 1 } )
@@ -1938,123 +1938,123 @@ function ConfigureLeaderboardServer()
     table.insert( routes, { event = "time_pve_raid_waterharvest_t5", target = "player_time_pve_raid_waterharvest_t5", update = LUT_SET_IF_LESSER } )
     table.insert( lbrds, { name = "player_time_pve_planetoidraid", entityType = LET_PLAYER, dir = 1 } )
     table.insert( routes, { event = "time_pve_planetoidraid", target = "player_time_pve_planetoidraid", update = LUT_SET_IF_LESSER } )
-    -- Прохождения анлимных миссий
-    -- table.insert( lbrds, { name = "unlim_pve_time_planet_war_waves_T1_25", expiresAt = "1553472000000", expAction = LEA_NOOP, entityType = LET_PLAYER, dir = 1 } ) -- expires Monday, 25 March 2019 г., 0:00:00 GMT
+    -- Passing unlim missions
+    -- table.insert( lbrds, { name = "unlim_pve_time_planet_war_waves_T1_25", expiresAt = "1553472000000", expAction = LEA_NOOP, entityType = LET_PLAYER, dir = 1 } ) -- expires Monday, 25 March 2019, 0:00:00 GMT
     -- table.insert( routes, { event = "unlim_pve_time_planet_war_waves_T1_25", target = "unlim_pve_time_planet_war_waves_T1_25", update = LUT_SET_IF_LESSER } )
     table.insert( lbrds, { name = "unlim_pve_level_planet_war_waves_T1", entityType = LET_PLAYER } )
     table.insert( routes, { event = "unlim_pve_level_planet_war_waves_T1", target = "unlim_pve_level_planet_war_waves_T1", update = LUT_SET_IF_GREATER } )
     -- Clan wars: militaryRank
     -- table.insert( lbrds, { name = "player_militaryRank", entityType = LET_PLAYER } )
     -- table.insert( routes, { event = "militaryRank", target = "player_militaryRank", update = LUT_SET } )
-    -- Clan wars: урон
+    -- Clan wars: damage
     -- table.insert( lbrds, { name = "player_warDamage", entityType = LET_PLAYER } )
     -- table.insert( routes, { event = "warDamage", target = "player_warDamage", update = LUT_INCREMENT } )
-    -- Количество убийств за битву +
+    -- Number of kills per battle +
     -- table.insert( lbrds, { name = "player_kills_per_battle", entityType = LET_PLAYER } )
     -- table.insert( routes, { event = "kills", target = "player_kills_per_battle", update = LUT_SET_IF_GREATER } )
-    -- Количество ачивпойнтов
+    -- Number of achievement points
     -- table.insert( lbrds, { name = "player_achievements", entityType = LET_PLAYER } )
     -- table.insert( routes, { event = "achievements", target = "player_achievements", update = LUT_SET } )
-    -- Рейтинг убийств
+    -- Kill Rating
     -- table.insert( lbrds, { name = "player_akari_r", entityType = LET_PLAYER } )
     -- table.insert( routes, { event = "akari_r", target = "player_akari_r", update = LUT_SET } )
-	-- Достигнутая волна в волновом пве
+	-- Reached wave in wave pve
 	table.insert( lbrds, { name = "player_wavePve_wave", entityType = LET_PLAYER } )
 	table.insert( routes, { event = "player_wavePve_wave", target = "player_wavePve_wave", update = LUT_SET_IF_GREATER } )
 
-    -- ЛИДЕРБОРДЫ ИГРОКОВ В НЕДЕЛЮ с наградой
-    -- Суммарное количество убийств в неделю
+    -- PLAYER LEADERBOARDS PER WEEK with reward
+    -- Total number of murders per week
     local r_player_kills_1	= { params = { stringId = "LeaderboardTop1", tokenCredits = 400 }, type = LRT_CREDITS, posMin = 1, posMax = 1 }
     local r_player_kills_2	= { params = { stringId = "LeaderboardTop2", tokenCredits = 200 }, type = LRT_CREDITS, posMin = 2, posMax = 2 }
     local r_player_kills_3	= { params = { stringId = "LeaderboardTop3", tokenCredits = 100 }, type = LRT_CREDITS, posMin = 3, posMax = 3 }
     table.insert( lbrds, { name = "player_kills_weekly", entityType = LET_PLAYER , expiresAt = nov_28_2013, renewalInterval = oneWeek, rewards = { r_player_kills_1, r_player_kills_2, r_player_kills_3 } } )
     table.insert( routes, { event = "kills_ht", target = "player_kills_weekly", update = LUT_INCREMENT } )
-    -- Максимальная пвп эффективность игрока в неделю
+    -- Maximum pvp player efficiency per week
     local r_player_pvp_eff_max_1	= { params = { stringId = "LeaderboardTop1", tokenCredits = 400 }, type = LRT_CREDITS, posMin = 1, posMax = 1 }
     local r_player_pvp_eff_max_2	= { params = { stringId = "LeaderboardTop2", tokenCredits = 200 }, type = LRT_CREDITS, posMin = 2, posMax = 2 }
     local r_player_pvp_eff_max_3	= { params = { stringId = "LeaderboardTop3", tokenCredits = 100 }, type = LRT_CREDITS, posMin = 3, posMax = 3 }
     table.insert( lbrds, { name = "player_pvp_eff_max_weekly", entityType = LET_PLAYER , expiresAt = nov_28_2013, renewalInterval = oneWeek, rewards = { r_player_pvp_eff_max_1, r_player_pvp_eff_max_2, r_player_pvp_eff_max_3 } } )
     table.insert( routes, { event = "pvp_eff_ht", target = "player_pvp_eff_max_weekly", update = LUT_SET_IF_GREATER } )
-    -- Максимальная пве эффективность игрока в неделю
+    -- Maximum pve player efficiency per week
     local r_player_pve_eff_max_1	= { params = { stringId = "LeaderboardTop1", tokenCredits = 400 }, type = LRT_CREDITS, posMin = 1, posMax = 1 }
     local r_player_pve_eff_max_2	= { params = { stringId = "LeaderboardTop2", tokenCredits = 200 }, type = LRT_CREDITS, posMin = 2, posMax = 2 }
     local r_player_pve_eff_max_3	= { params = { stringId = "LeaderboardTop3", tokenCredits = 100 }, type = LRT_CREDITS, posMin = 3, posMax = 3 }
     table.insert( lbrds, { name = "player_pve_eff_max_weekly", entityType = LET_PLAYER , expiresAt = nov_28_2013, renewalInterval = oneWeek, rewards = { r_player_pve_eff_max_1, r_player_pve_eff_max_2, r_player_pve_eff_max_3 } } )
     table.insert( routes, { event = "pve_eff", target = "player_pve_eff_max_weekly", update = LUT_SET_IF_GREATER } )
-    -- Количество прохождений PvE в неделю
+    -- Number of PvE playthroughs per week
     local r_player_pve_win_1	= { params = { stringId = "LeaderboardTop1", tokenCredits = 400 }, type = LRT_CREDITS, posMin = 1, posMax = 1 }
     local r_player_pve_win_2	= { params = { stringId = "LeaderboardTop2", tokenCredits = 200 }, type = LRT_CREDITS, posMin = 2, posMax = 2 }
     local r_player_pve_win_3	= { params = { stringId = "LeaderboardTop3", tokenCredits = 100 }, type = LRT_CREDITS, posMin = 3, posMax = 3 }
     table.insert( lbrds, { name = "player_pve_win_weekly", entityType = LET_PLAYER , expiresAt = nov_28_2013, renewalInterval = oneWeek, rewards = { r_player_pve_win_1, r_player_pve_win_2, r_player_pve_win_3 } } )
     table.insert( routes, { event = "pvegwin", target = "player_pve_win_weekly", update = LUT_INCREMENT } )
-    -- Новый рейтинг игроков за неделю
+    -- New player rating for the week
     local r_player_eff_win_1	= { params = { stringId = "LeaderboardTop1eff", tid = 31 }, type = LRT_CREDITS, posMin = 1, posMax = 3 }
     local r_player_eff_win_2	= { params = { stringId = "LeaderboardTop2eff", tid = 32 }, type = LRT_CREDITS, posMin = 4, posMax = 20 }
     local r_player_eff_win_3	= { params = { stringId = "LeaderboardTop3eff", tid = 33 }, type = LRT_CREDITS, posMin = 21, posMax = 50 }
     table.insert( lbrds, { name = "player_eff_rating_weekly", entityType = LET_PLAYER , expiresAt = nov_28_2013, renewalInterval = oneWeek, rewards = { r_player_eff_win_1, r_player_eff_win_2, r_player_eff_win_3 } } )
     table.insert( routes, { event = "eff_rating", target = "player_eff_rating_weekly", update = LUT_SET } )
 
-    -- ЛИДЕРБОРДЫ ИГРОКОВ КЛАНОВ
-    -- Суммарная пвп эффективность игрока в клане
+    -- LEADERBOARDS OF CLAN PLAYERS
+    -- Total pvp efficiency of a player in a clan
     table.insert( lbrds, { name = "cm_pvp_effectiveness", entityType = LET_CLAN_MEMBER, decayInterval = 60 * 24, decayPower = 0.1 } )
     table.insert( routes, { event = "pvp_eff", target = "cm_pvp_effectiveness", update = LUT_INCREMENT } )
-    -- Суммарная пве эффективность игрока в клане
+    -- Total pve efficiency of a player in a clan
     table.insert( lbrds, { name = "cm_pve_effectiveness", entityType = LET_CLAN_MEMBER, decayInterval = 60 * 24, decayPower = 0.1 } )
     table.insert( routes, { event = "pve_eff", target = "cm_pve_effectiveness", update = LUT_INCREMENT } )
-    -- Суммарное количество очков влияния заработанное членом клана
+    -- The total number of influence points earned by a clan member
     table.insert( lbrds, { name = "cm_pressure", entityType = LET_CLAN_MEMBER } )
     table.insert( routes, { event = "pressure", target = "cm_pressure", update = LUT_INCREMENT } )
     -- Clan wars: militaryRank
     table.insert( lbrds, { name = "cm_military_rank", entityType = LET_CLAN_MEMBER } )
     table.insert( routes, { event = "militaryRank", target = "cm_military_rank", update = LUT_SET } )
-    -- Clan wars: урон
+    -- Clan wars: damage
     table.insert( lbrds, { name = "cm_war_damage", entityType = LET_CLAN_MEMBER } )
     table.insert( routes, { event = "warDamage", target = "cm_war_damage", update = LUT_INCREMENT } )
-    -- Clan wars: потери
+    -- Clan wars: losses
     table.insert( lbrds, { name = "cm_war_losses", entityType = LET_CLAN_MEMBER } )
     table.insert( routes, { event = "warLosses", target = "cm_war_losses", update = LUT_INCREMENT } )
-    -- Количество ачивпойнтов
+    -- Number of achievement points
     -- table.insert( lbrds, { name = "cm_achievements", entityType = LET_CLAN_MEMBER } )
     -- table.insert( routes, { event = "achievements", target = "cm_achievements", update = LUT_SET } )
 
-    -- ЛИДЕРБОРДЫ КЛАНОВ
-    -- Суммарное количество очков клана заработанных в пвп уменьшающаяся на 1% каждый час
+    -- CLAN LEADERBOARDS
+    -- The total number of clan points earned in pvp decreases by 1% every hour
     table.insert( lbrds, { name = "CLS_PVP_RATING", entityType = LET_CLAN, decayInterval = 60, decayPower = 0.01 } )
     table.insert( routes, { event = "pvp_b", target = "CLS_PVP_RATING", update = LUT_INCREMENT } )
-    -- Суммарная пве эффективность клана уменьшающаяся на 1% каждый час
+    -- The total pve efficiency of the clan decreases by 1% every hour
     table.insert( lbrds, { name = "CLS_PVE_RATING", entityType = LET_CLAN, decayInterval = 60, decayPower = 0.01 } )
     table.insert( routes, { event = "pve_eff", target = "CLS_PVE_RATING", update = LUT_INCREMENT } )
-    -- Clan wars: урон
+    -- Clan wars: damage
     table.insert( lbrds, { name = "CLS_WAR_DAMAGE", entityType = LET_CLAN } )
     table.insert( routes, { event = "warDamage", target = "CLS_WAR_DAMAGE", update = LUT_INCREMENT } )
-    -- Суммарное количество захватов локаций
+    -- Total number of location captures
     table.insert( lbrds, { name = "CLS_ZONE_CAPTURE", entityType = LET_CLAN } )
     table.insert( routes, { event = "zoneCapture", target = "CLS_ZONE_CAPTURE", update = LUT_INCREMENT } )
-    -- Clan wars: текущей рейтинг
+    -- Clan wars: current rating
     table.insert( lbrds, { name = "CLS_WAR_RATING", entityType = LET_CLAN } )
     table.insert( routes, { event = "warRating", target = "CLS_WAR_RATING", update = LUT_SET } )
-    -- Clan wars: максимальный достигнутый рейтинг
+    -- Clan wars: maximum rating achieved
     table.insert( lbrds, { name = "CLS_WAR_RATING_MAX", entityType = LET_CLAN } )
     table.insert( routes, { event = "warRating", target = "CLS_WAR_RATING_MAX", update = LUT_SET_IF_GREATER } )
-    -- Суммарное количество очков влияния заработанное кланом
+    -- The total number of influence points earned by the clan
     -- table.insert( lbrds, { name = "CLS_PRESSURE", entityType = LET_CLAN } )
     -- table.insert( routes, { event = "pressure", target = "CLS_PRESSURE", update = LUT_INCREMENT } )
-    -- ELO рейтинг корпорации
+    -- ELO corporate rating
     -- table.insert( lbrds, { name = "CLS_ELO", entityType = LET_CLAN } )
     -- table.insert( routes, { event = "unWElo", target = "CLS_ELO", update = LUT_SET } )
-    -- АРЕНЫ
+    -- ARENA
     -- table.insert( lbrds, { name = "league_rating", entityType = LET_LEAGUE_TEAM } )
     -- table.insert( routes, { event = "league_rating", target = "league_rating", update = LUT_SET } )
-    -- Суммарное количество ирридиума когда либо сданное в корпорацию
+    -- Total amount of irridium ever delivered to the corporation
     -- table.insert( lbrds, { name = "CLS_IRIDIUM", entityType = LET_CLAN } )
     -- table.insert( routes, { event = "cbt_iridium", target = "CLS_IRIDIUM", update = LUT_INCREMENT } )
-    -- Суммарное количество очков влияния когда либо полученное кланом
+    -- The total number of influence points ever received by the clan
     -- table.insert( lbrds, { name = "CLS_INFLUENCE", entityType = LET_CLAN } )
     -- table.insert( routes, { event = "clanInf", target = "CLS_INFLUENCE", update = LUT_INCREMENT } )
-    -- Суммарное количество секторов когда либо контролируемое кланом
+    -- Total number of sectors ever controlled by a clan
     -- table.insert( lbrds, { name = "CLS_GALAXIES", entityType = LET_CLAN } )
     -- table.insert( routes, { event = "gal_cap", target = "CLS_GALAXIES", update = LUT_INCREMENT } )
-    -- Количество людей в клане
+    -- Number of people in the clan
     -- table.insert( lbrds, { name = "CLS_MEMBERS", entityType = LET_CLAN } )
     -- table.insert( routes, { event = "cSize", target = "CLS_MEMBERS", update = LUT_SET } )
 
@@ -2088,8 +2088,8 @@ function ConfigureLeaderboardServer()
 	table.insert( lbrds, { name = "event_green_war_total", entityType = LET_PLAYER } )
 	table.insert( routes, { event = "green_war_total", target = "event_green_war_total", update = LUT_SET } )
 	
-	-- ВРЕМЕННЫЕ ЛИДЕРБОРДЫ
-    -- Рейтинг апрельской потасовки
+	-- TEMPORARY LEADERBOARDS
+    -- April Brawl rating
 	table.insert( lbrds, { name = "player_april_win", entityType = LET_PLAYER } )
     table.insert( routes, { event = "atdmgwin", target = "player_april_win", update = LUT_INCREMENT } )
 	
@@ -2104,7 +2104,7 @@ function ConfigureLeaderboardServer()
     Leaderboards_Configure( lbrds )
     Leaderboards_Routes( routes )
 
-    -- Включает отладочный дамп каждого входящего события лидерборда в лог. (тип: целое число)
+    -- Includes a debug dump of each incoming leaderboard event in the log. (type: integer)
     -- cvars.leaderboard_logEvents = 1
 end
 
@@ -2112,8 +2112,8 @@ end
 
 function ConfigureZoneCoordinator()
 
-	-- Включает блокировку зон по расписанию raid: ZoneCoordinator передаёт флаг в запускаемые ZoneInstance и в уже работающие инстансы.
-	-- Внутри FreeSpace по текущему расписанию выбирается raid-зона, и переходы/джампы в эту зону запрещаются. (тип: целое число)
+	-- Enables blocking of zones according to a raid schedule: ZoneCoordinator passes the flag to launched ZoneInstances and to already running instances.
+	-- Inside FreeSpace, a raid zone is selected according to the current schedule, and transitions/jumps to this zone are prohibited. (type: integer)
 	cvars.zc_enableZoneBlocks	= 0
 	
 end
@@ -2121,19 +2121,19 @@ end
 
 function ConfigureTournament()
 
-	-- Смещение номеров имён турнирных команд в UI: клиент прибавляет это значение к номеру имени и берёт строку single_tournament_name_N.
-	-- Позволяет сдвинуть набор отображаемых имён команд без изменения их реальных teamId. (тип: целое число)
+	-- Offset of tournament team name numbers in the UI: the client adds this value to the name number and takes the string single_tournament_name_N.
+	-- Allows you to shift the set of displayed team names without changing their actual teamId. (type: integer)
 	cvars.tournament_idOffset	= 0
-    -- Уровни/карты турнира. (тип: строка)
-    -- ;s1338_pandora_anomaly глючит
+    -- Tournament levels/maps. (type: string)
+    -- ;s1338_pandora_anomaly is buggy
     cvars.tournament_levels 	=  "s1338_devilsjaw;s1338_pandora_dreadnwreck;s1340_thar_aliendebris13;s1420_ceres3_asteroidcity;s1420_ceres3_northmsite;s8256_thar_barrierdebris;s8256_thar_lavastone;s8256_thar_threshold;desttown"
-  	-- Боевой ранг турнира; копируется в sv_mmBattleRank. (тип: целое число; диапазон: 0..ai::MAX_SHIP_RANK)
+  	-- Tournament combat rank; copied to sv_mmBattleRank. (type: integer; range: 0..ai::MAX_SHIP_RANK)
   	cvars.tournament_battleRank = 17
-    -- Игровой режим турнира. (тип: целое число; диапазон: ai::GT_SPACE_BATTLE..ai::GT_MISSION_SCRIPT - 1)
+    -- Tournament game mode. (type: integer; range: ai::GT_SPACE_BATTLE..ai::GT_MISSION_SCRIPT - 1)
     cvars.tournament_gamemode 	= 12
-    -- Максимальный размер команды в турнире. (тип: целое число; диапазон: 1..MAX_TOURNAMENT_TEAM_SIZE)
+    -- Maximum team size for a tournament. (type: integer; range: 1..MAX_TOURNAMENT_TEAM_SIZE)
     cvars.tournament_teamSize 	= 8
-    -- Интервал между созданием игр в миллисекундах. (тип: целое число; диапазон: 50..10000)
+    -- Interval between game creations in milliseconds. (type: integer; range: 50..10000)
     cvars.tournament_gameInterval	= 2000
 	
 end
@@ -2141,19 +2141,19 @@ end
 
 function ConfigureClanServer()
 
-	-- Количество основных частей кланового корабля, доступных для строительства. (тип: целое число)
-	-- (0,1,2,3,4) этапы строительства дредноута
+	-- The number of main parts of a clan ship available for construction. (type: integer)
+	-- (0,1,2,3,4) stages of dreadnought construction
 	cvars.clan_shipPartsCanBuild 	= 4
-	-- Максимальное количество апгрейдов модулей кланового корабля, доступных для строительства. (тип: целое число)
-	-- (0,1,2,3) этапы апгрейдов дредноута (Т3,Т4,Т5)
+	-- The maximum number of upgrades for clan ship modules available for construction. (type: integer)
+	-- (0,1,2,3) stages of dreadnought upgrades (T3,T4,T5)
 	cvars.clan_shipUpgradeCanBuild	= 3
-	-- Количество высокоранговых участников клана, необходимое для строительства кланового корабля. (тип: целое число)
-	-- кол-во человек в клане 9 ранга
+	-- The number of high-ranking clan members required to build a clan ship. (type: integer)
+	-- number of people in the clan of rank 9
 	cvars.clan_shipBuildHighRanks 	= 3
-	-- Минимальное количество ресурса из зоны для записи в историю клана. (тип: целое число)
-	-- Если с зоны пришло меньше иррисок - не спамить в лог корпы.
+	-- The minimum amount of resource from the zone to be recorded in the clan history. (type: integer)
+	-- If less toffees came from the zone, do not spam the corp log.
 	cvars.clans_historyMinResourceAddByZone = 10
-    -- Награда за победу в войне. (тип: строка)
+    -- Reward for victory in the war. (type: string)
     cvars.clan_warWinRewardAura = 'Bundle_ClanWar_Win'
 	
 end
