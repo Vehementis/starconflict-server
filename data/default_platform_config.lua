@@ -80,15 +80,15 @@ function ConfigureShard()
 
 	
 	-- Разрешает покупать предметы магазина, даже если у них стоит флаг cant_be_bought. (тип: логический)
-	cvars.store_allowAllItemsForBying	= 0
+	cvars.store_allowAllItemsForBying	= 1
 
 	-- Включает логирование корабельных квестов. (тип: логический)
 	cvars.shipQuests_dbgLog				= 0
 
 	-- Стартовое количество gold для нового аккаунта. (тип: целое число)
-	cvars.gold_on_start					= 300
+	cvars.gold_on_start					= 30000
 	-- Стартовое premium-время/значение для нового аккаунта. (тип: целое число)
-	cvars.premium_on_start				= 0
+	cvars.premium_on_start				= 1000
 	-- Стартовое количество credits для нового аккаунта. (тип: целое число)
 	cvars.credits_on_start				= 0
 
