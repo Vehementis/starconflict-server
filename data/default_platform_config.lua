@@ -1842,7 +1842,7 @@ function ConfigureLobbyServer()
 	-- Награды за пользовательские игры умножаются на это значение. (тип: дробное число)
 	cvars.lobby_rewardRates		= 1
   	-- Минимум/максимум игроков для запуска PvE-lobby.
-  	cvars.lobby_reqPlayersPvEMin = 3
+  	cvars.lobby_reqPlayersPvEMin = 1
 	-- Минимум/максимум игроков для запуска PvE-lobby.
 	cvars.lobby_reqPlayersPvEMax = 4
     -- Лимит одинаковых unique-модулей на один корабль; отдельно задаётся для обычных и premium-кораблей.
