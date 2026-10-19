@@ -375,13 +375,13 @@ function ConfigureMatchmaker()
 
 		-- PVE QUEUE
 		{
-			maxPlayers = 1,
+			maxPlayers = 4,
 			minPlayers = 1,
 			regionLocalizedTimeInQueue = 10,
 			maxTimeInQueue = 10,
 			levelsDesc = {},
 			query = { ["mmParams.pve"] = 1 },
-			special = { pve = 1, gameMode = 7 },
+			special = { pve = 1, gameMode = 7, botsCount = 3 },
 		}
 	}
 
@@ -403,7 +403,7 @@ function ConfigureMatchmaker()
 			s8256_thar_barrierdebris = {4,9,11},
 			s1338_pandora_dreadnwreck = {4,9,11},
 		},
-		query = { ["mmParams.arcade"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 15 }, mmSquadRank = { ["$gte"] = 1, ["$lte"] = 15 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
+		query = { ["mmParams.arcade"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 17 }, mmSquadRank = { ["$gte"] = 1, ["$lte"] = 17 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
 		special = { arcade = 1 },
 	}
 
@@ -439,7 +439,7 @@ function ConfigureMatchmaker()
 			s8256_thar_barrierdebris = {4,9,11},
 			s1338_pandora_dreadnwreck = {4,9,11},
 		},
-		query = { ["mmParams.coop_vs_ai"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 15 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
+		query = { ["mmParams.coop_vs_ai"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 17 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
 		special = { coop_vs_ai = 1 },
 	}
 
@@ -700,13 +700,13 @@ function ConfigureMatchmaker()
 
 		-- PVE QUEUE
 		{
-			maxPlayers = 1,
+			maxPlayers = 4,
 			minPlayers = 1,
 			regionLocalizedTimeInQueue = 10,
 			maxTimeInQueue = 10,
 			levelsDesc = {},
 			query = { ["mmParams.pve"] = 1 },
-			special = { pve = 1, gameMode = 7 },
+			special = { pve = 1, gameMode = 7, botsCount = 3 },
 		}
 	}
 
@@ -725,7 +725,7 @@ function ConfigureMatchmaker()
 			-- s8256_thar_barrierdebris = {4,9,11},
 			-- s1338_pandora_dreadnwreck = {4,9,11},
 		},
-		query = { ["mmParams.arcade"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 15 }, mmSquadRank = { ["$gte"] = 1, ["$lte"] = 15 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
+		query = { ["mmParams.arcade"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 17 }, mmSquadRank = { ["$gte"] = 1, ["$lte"] = 17 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
 		special = { arcade = 1 },
 	}
 
@@ -773,7 +773,7 @@ function ConfigureMatchmaker()
 			s8256_thar_barrierdebris = {4,9,11},
 			s1338_pandora_dreadnwreck = {4,9,11},
 		},
-		query = { ["mmParams.coop_vs_ai"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 15 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
+		query = { ["mmParams.coop_vs_ai"] = 1, mmRank = { ["$gte"] = 1, ["$lte"] = 17 }, mmValue = { ["$gte"] = 0, ["$lt"] = 100 } },
 		special = { coop_vs_ai = 1 },
 	}
 
@@ -866,7 +866,7 @@ function ConfigureMatchmaker()
 		regionLocalizedTimeInQueue = 10,
 		maxTimeInQueue = 10,
 		levelsDesc = {},
-		special = { pve_raid = 1, gameMode = 7 },
+		special = { pve_raid = 1, gameMode = 7, botsCount = 11 },
 		query = { ["mmParams.pve_raid"] = 1 },
 		--squadFilter = 4, -- wings only, now use cvar in shard mm_raidSquadFilter
 	}
@@ -886,7 +886,7 @@ function ConfigureMatchmaker()
 
 	-- Количество ботов. (тип: целое число; диапазон: 0..31)
 	-- Базовое количество ботов; в конкретной очереди может быть переопределено.
-	cvars.mm_botsCount = 6
+	cvars.mm_botsCount = 16
 
 	-- Базовый игровой режим для новой игровой сессии; в конкретной очереди может быть переопределён.
 	-- Возможные значения (не все работают):
