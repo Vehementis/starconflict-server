@@ -1,2 +1,4 @@
 # MongoDB folder (large database files, not part of the source repository)
 mongodb/
+
+.vscode/
