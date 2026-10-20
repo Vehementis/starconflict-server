@@ -88,7 +88,7 @@ function ConfigureShard()
 	-- Starting amount of gold for a new account. (type: integer)
 	cvars.gold_on_start					= 30000
 	-- Starting premium time/value for a new account. (type: integer)
-	cvars.premium_on_start				= 1000
+	cvars.premium_on_start				= 2592000
 	-- The starting number of credits for a new account. (type: integer)
 	cvars.credits_on_start				= 0
 
