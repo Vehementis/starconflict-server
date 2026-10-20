@@ -80,7 +80,7 @@ function ConfigureShard()
 
 	
 	-- Allows you to buy store items even if they have the cant_be_bought flag. (type: boolean)
-	cvars.store_allowAllItemsForBying	= 1
+	cvars.store_allowAllItemsForBying	= 0
 
 	-- Enables logging of ship quests. (type: boolean)
 	cvars.shipQuests_dbgLog				= 0
