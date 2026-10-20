@@ -104,7 +104,7 @@ function ConfigureShard()
     	cvars.store_vesselExpExtractionCostVisualBonus = 0
    	else
     	-- Visual bonus/indicator of the cost of extracting ship experience. (type: fractional number)
-    	cvars.store_vesselExpExtractionCostVisualBonus = 1
+    	cvars.store_vesselExpExtractionCostVisualBonus = 850
     end
 
 	-- Ship price multiplier in the store. Multiplies all types of ship prices: credits, premium, tokens and event price. (type: fractional number; range: 0.001f..100.0f)
